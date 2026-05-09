@@ -155,7 +155,25 @@
       outline: none;
     }
 
-    textarea { min-height: 120px; resize: vertical; }
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      line-height: 1.55;
+      font-size: 0.98rem;
+      overflow-y: hidden;
+    }
+
+    textarea.compact-textarea {
+      min-height: 120px;
+    }
+
+    textarea.large-textarea {
+      min-height: 320px;
+    }
+
+    textarea.extra-large-textarea {
+      min-height: 460px;
+    }
 
     input:focus, select:focus, textarea:focus {
       border-color: var(--accent);
@@ -525,7 +543,7 @@
             <div class="derived-box"><span class="derived-label">Highest Slot</span><span class="derived-value" id="highestSpellSlot">—</span></div>
           </div>
           <div class="slot-grid" id="spellSlotGrid"></div>
-          <label>Prepared / Known Spells <textarea data-field="spellsKnown" placeholder="Cantrips, prepared spells, known spells, rituals..."></textarea></label>
+          <label>Prepared / Known Spells <textarea class="large-textarea" data-field="spellsKnown" placeholder="Cantrips, prepared spells, known spells, rituals..."></textarea></label>
         </div>
       </section>
 
@@ -543,30 +561,30 @@
       <section class="panel span-8">
         <div class="panel-header"><h2 class="panel-title">Attacks, Features, Equipment</h2></div>
         <div class="panel-body stack">
-          <label>Attacks & Spellcasting <textarea data-field="attacks" placeholder="Plasma sabre: +5 to hit, 1d8+3 radiant..."></textarea></label>
-          <label>Features & Traits <textarea data-field="features"></textarea></label>
-          <label>Inventory <textarea data-field="inventory"></textarea></label>
+          <label>Attacks & Spellcasting <textarea class="large-textarea" data-field="attacks" placeholder="Plasma sabre: +5 to hit, 1d8+3 radiant..."></textarea></label>
+          <label>Features & Traits <textarea class="extra-large-textarea" data-field="features"></textarea></label>
+          <label>Inventory <textarea class="large-textarea" data-field="inventory"></textarea></label>
         </div>
       </section>
 
       <section class="panel span-4">
         <div class="panel-header"><h2 class="panel-title">Prisoner File</h2></div>
         <div class="panel-body stack">
-          <label>Listed Crime <textarea data-field="listedCrime"></textarea></label>
-          <label>True Reason Imprisoned <textarea data-field="trueReason"></textarea></label>
+          <label>Listed Crime <textarea class="compact-textarea" data-field="listedCrime"></textarea></label>
+          <label>True Reason Imprisoned <textarea class="compact-textarea" data-field="trueReason"></textarea></label>
           <label>Ship Role After Escape <input data-field="shipRole" /></label>
-          <label>Seed / Law Exposure <textarea data-field="seedExposure"></textarea></label>
+          <label>Seed / Law Exposure <textarea class="compact-textarea" data-field="seedExposure"></textarea></label>
         </div>
       </section>
 
       <section class="panel span-12">
         <div class="panel-header"><h2 class="panel-title">Backstory</h2></div>
-        <div class="panel-body"><label>Character Backstory <textarea data-field="backstory" placeholder="Origin, crime, old life, people left behind, what they believe they deserve..."></textarea></label></div>
+        <div class="panel-body"><label>Character Backstory <textarea class="extra-large-textarea" data-field="backstory" placeholder="Origin, crime, old life, people left behind, what they believe they deserve..."></textarea></label></div>
       </section>
 
       <section class="panel span-12">
         <div class="panel-header"><h2 class="panel-title">Notes</h2></div>
-        <div class="panel-body"><label>Campaign Notes <textarea data-field="notes" placeholder="Contacts, debts, warrants, NPC bonds, secrets, discoveries..."></textarea></label></div>
+        <div class="panel-body"><label>Campaign Notes <textarea class="extra-large-textarea" data-field="notes" placeholder="Contacts, debts, warrants, NPC bonds, secrets, discoveries..."></textarea></label></div>
       </section>
     </section>
   </main>
@@ -967,6 +985,16 @@
         : `<div class="portrait-placeholder">No portrait uploaded</div>`;
     }
 
+    function autoResizeTextarea(textarea) {
+      if (!textarea || textarea.tagName !== "TEXTAREA") return;
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.max(textarea.scrollHeight + 2, parseInt(getComputedStyle(textarea).minHeight, 10) || 180)}px`;
+    }
+
+    function resizeAllTextareas() {
+      document.querySelectorAll("textarea").forEach(autoResizeTextarea);
+    }
+
     function bindFieldValues() {
       const character = activeCharacter();
       document.querySelectorAll("[data-field]").forEach(field => {
@@ -978,7 +1006,9 @@
         field.disabled = false;
         const key = field.dataset.field;
         field.value = character[key] ?? "";
+        autoResizeTextarea(field);
         field.oninput = event => {
+          autoResizeTextarea(field);
           character[key] = field.type === "number" ? Number(event.target.value || 0) : event.target.value;
           if (["name", "className", "level", "threatClass"].includes(key)) {
             renderCharacterList();
@@ -1157,6 +1187,7 @@
       }
 
       render();
+      resizeAllTextareas();
       setStatus("Synced to Firestore", "ok");
     }, error => {
       console.error(error);
