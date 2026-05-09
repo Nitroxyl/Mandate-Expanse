@@ -1,2 +1,0 @@
-# Mandate-Expanse
-DND
