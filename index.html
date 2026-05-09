@@ -242,6 +242,84 @@
 
     .small-note { color: var(--muted); font-size: 0.8rem; }
 
+    .portrait-wrap {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 720px) { .portrait-wrap { grid-template-columns: 1fr; } }
+
+    .portrait-frame {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      min-height: 260px;
+      background: rgba(5, 9, 16, 0.78);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .portrait-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .portrait-placeholder {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 780px) { .slot-grid { grid-template-columns: 1fr; } }
+
+    .slot-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(5, 9, 16, 0.72);
+      display: grid;
+      gap: 8px;
+    }
+
+    .slot-title {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .slot-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .slot-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .slot-buttons button {
+      flex: 1;
+      padding: 7px 8px;
+    }
+
     .derived-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
     @media (max-width: 720px) { .derived-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
@@ -369,6 +447,28 @@
 
       <section class="panel span-12">
         <div class="panel-header">
+          <h2 class="panel-title">Character Image</h2>
+          <span class="tag">Portrait saved to Firestore</span>
+        </div>
+        <div class="panel-body">
+          <div class="portrait-wrap">
+            <div class="portrait-frame" id="portraitFrame">
+              <div class="portrait-placeholder">No portrait uploaded</div>
+            </div>
+            <div class="stack">
+              <label>Image URL <input data-field="portraitUrl" placeholder="Paste image URL, or upload a file below" /></label>
+              <label>Upload Portrait <input type="file" id="portraitUpload" accept="image/*" /></label>
+              <div class="button-row">
+                <button id="clearPortraitBtn" type="button">Clear Portrait</button>
+              </div>
+              <p class="small-note">Uploaded files are compressed to keep Firestore usage reasonable. Use portraits/tokens, not full-resolution artwork.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel span-12">
+        <div class="panel-header">
           <h2 class="panel-title">Core Stats</h2>
           <span class="tag">Modifier = floor((score - 10) / 2)</span>
         </div>
@@ -397,8 +497,41 @@
         </div>
       </section>
 
+      <section class="panel span-12">
+        <div class="panel-header">
+          <h2 class="panel-title">Spellcasting</h2>
+          <span class="tag">Slots sync in real time</span>
+        </div>
+        <div class="panel-body stack">
+          <div class="row-3">
+            <label>Spellcasting Ability
+              <select data-field="spellcastingAbility">
+                <option value="none">None</option>
+                <option value="int">Intelligence</option>
+                <option value="wis">Wisdom</option>
+                <option value="cha">Charisma</option>
+                <option value="str">Strength</option>
+                <option value="dex">Dexterity</option>
+                <option value="con">Constitution</option>
+              </select>
+            </label>
+            <label>Save DC Bonus <input type="number" data-field="spellSaveDcBonus" /></label>
+            <label>Attack Bonus Override <input type="number" data-field="spellAttackBonusOverride" placeholder="Blank/0 = auto" /></label>
+          </div>
+          <div class="derived-grid">
+            <div class="derived-box"><span class="derived-label">Spell Save DC</span><span class="derived-value" id="spellSaveDc">—</span></div>
+            <div class="derived-box"><span class="derived-label">Spell Attack</span><span class="derived-value" id="spellAttackBonus">—</span></div>
+            <div class="derived-box"><span class="derived-label">Caster Ability</span><span class="derived-value" id="casterAbilityLabel">None</span></div>
+            <div class="derived-box"><span class="derived-label">Highest Slot</span><span class="derived-value" id="highestSpellSlot">—</span></div>
+          </div>
+          <div class="slot-grid" id="spellSlotGrid"></div>
+          <label>Prepared / Known Spells <textarea data-field="spellsKnown" placeholder="Cantrips, prepared spells, known spells, rituals..."></textarea></label>
+        </div>
+      </section>
+
       <section class="panel span-6">
-        <div class="panel-header"><h2 class="panel-title">Saving Throws</h2></div>
+        <div class="panel-header">
+          <h2 class="panel-title">Saving Throws</h2></div>
         <div class="panel-body"><table><thead><tr><th class="checkbox-cell">Prof</th><th>Save</th><th>Ability</th><th>Total</th></tr></thead><tbody id="savesTable"></tbody></table></div>
       </section>
 
@@ -424,6 +557,11 @@
           <label>Ship Role After Escape <input data-field="shipRole" /></label>
           <label>Seed / Law Exposure <textarea data-field="seedExposure"></textarea></label>
         </div>
+      </section>
+
+      <section class="panel span-12">
+        <div class="panel-header"><h2 class="panel-title">Backstory</h2></div>
+        <div class="panel-body"><label>Character Backstory <textarea data-field="backstory" placeholder="Origin, crime, old life, people left behind, what they believe they deserve..."></textarea></label></div>
       </section>
 
       <section class="panel span-12">
@@ -518,6 +656,13 @@
       trueReason: "",
       shipRole: "",
       seedExposure: "",
+      backstory: "",
+      portraitUrl: "",
+      spellcastingAbility: "none",
+      spellSaveDcBonus: 0,
+      spellAttackBonusOverride: 0,
+      spellsKnown: "",
+      spellSlots: Object.fromEntries(Array.from({ length: 9 }, (_, index) => [String(index + 1), { max: 0, current: 0 }])),
       notes: "",
       stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       saveProficiencies: { str: false, dex: false, con: false, int: false, wis: false, cha: false },
@@ -554,8 +699,21 @@
         stats: { ...base.stats, ...(character.stats || {}) },
         saveProficiencies: { ...base.saveProficiencies, ...(character.saveProficiencies || {}) },
         skillProficiencies: { ...base.skillProficiencies, ...(character.skillProficiencies || {}) },
-        skillExpertise: { ...base.skillExpertise, ...(character.skillExpertise || {}) }
+        skillExpertise: { ...base.skillExpertise, ...(character.skillExpertise || {}) },
+        spellSlots: mergeSpellSlots(base.spellSlots, character.spellSlots || {})
       };
+    }
+
+    function mergeSpellSlots(baseSlots, incomingSlots) {
+      const merged = structuredClone(baseSlots);
+      for (let level = 1; level <= 9; level++) {
+        const key = String(level);
+        merged[key] = {
+          max: Number(incomingSlots[key]?.max || 0),
+          current: Number(incomingSlots[key]?.current || 0)
+        };
+      }
+      return merged;
     }
 
     function mod(score) { return Math.floor((Number(score || 0) - 10) / 2); }
@@ -605,7 +763,9 @@
       renderStatGrid();
       renderSaves();
       renderSkills();
+      renderSpellSlots();
       bindFieldValues();
+      renderPortrait();
       renderDerivedValues();
       isRemoteRender = false;
     }
@@ -657,6 +817,7 @@
           renderStatGrid();
           renderSaves();
           renderSkills();
+          renderSpellSlots();
           renderDerivedValues();
           scheduleSave();
         });
@@ -730,6 +891,82 @@
       });
     }
 
+    function renderSpellSlots() {
+      const character = activeCharacter();
+      const grid = document.getElementById("spellSlotGrid");
+      grid.innerHTML = "";
+      if (!character) return;
+
+      for (let level = 1; level <= 9; level++) {
+        const key = String(level);
+        const slot = character.spellSlots[key] || { max: 0, current: 0 };
+        const card = document.createElement("div");
+        card.className = "slot-card";
+        card.innerHTML = `
+          <div class="slot-title">Level ${level} Slots</div>
+          <div class="slot-controls">
+            <label>Current <input type="number" min="0" data-slot-current="${key}" value="${Number(slot.current || 0)}" /></label>
+            <label>Max <input type="number" min="0" data-slot-max="${key}" value="${Number(slot.max || 0)}" /></label>
+          </div>
+          <div class="slot-buttons">
+            <button type="button" data-slot-use="${key}">Use</button>
+            <button type="button" data-slot-restore="${key}">Restore</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+
+      grid.querySelectorAll("[data-slot-current]").forEach(input => {
+        input.addEventListener("input", event => {
+          const key = event.target.dataset.slotCurrent;
+          character.spellSlots[key].current = Math.max(0, Number(event.target.value || 0));
+          renderDerivedValues();
+          scheduleSave();
+        });
+      });
+
+      grid.querySelectorAll("[data-slot-max]").forEach(input => {
+        input.addEventListener("input", event => {
+          const key = event.target.dataset.slotMax;
+          const max = Math.max(0, Number(event.target.value || 0));
+          character.spellSlots[key].max = max;
+          if (character.spellSlots[key].current > max) character.spellSlots[key].current = max;
+          renderSpellSlots();
+          renderDerivedValues();
+          scheduleSave();
+        });
+      });
+
+      grid.querySelectorAll("[data-slot-use]").forEach(button => {
+        button.addEventListener("click", event => {
+          const key = event.target.dataset.slotUse;
+          character.spellSlots[key].current = Math.max(0, Number(character.spellSlots[key].current || 0) - 1);
+          renderSpellSlots();
+          renderDerivedValues();
+          scheduleSave();
+        });
+      });
+
+      grid.querySelectorAll("[data-slot-restore]").forEach(button => {
+        button.addEventListener("click", event => {
+          const key = event.target.dataset.slotRestore;
+          character.spellSlots[key].current = Number(character.spellSlots[key].max || 0);
+          renderSpellSlots();
+          renderDerivedValues();
+          scheduleSave();
+        });
+      });
+    }
+
+    function renderPortrait() {
+      const character = activeCharacter();
+      const frame = document.getElementById("portraitFrame");
+      const source = character?.portraitUrl;
+      frame.innerHTML = source
+        ? `<img src="${escapeHtml(source)}" alt="Character portrait for ${escapeHtml(character.name || "inmate")}">`
+        : `<div class="portrait-placeholder">No portrait uploaded</div>`;
+    }
+
     function bindFieldValues() {
       const character = activeCharacter();
       document.querySelectorAll("[data-field]").forEach(field => {
@@ -746,6 +983,10 @@
           if (["name", "className", "level", "threatClass"].includes(key)) {
             renderCharacterList();
             renderDerivedValues();
+          } else if (["spellcastingAbility", "spellSaveDcBonus", "spellAttackBonusOverride"].includes(key)) {
+            renderDerivedValues();
+          } else if (key === "portraitUrl") {
+            renderPortrait();
           } else {
             renderDerivedValues();
           }
@@ -761,11 +1002,25 @@
       const initiative = mod(character.stats.dex) + Number(character.initiativeBonus || 0);
       const passivePerception = 10 + skillTotal(character, "perception", "wis");
       const passiveInsight = 10 + skillTotal(character, "insight", "wis");
+      const casterAbility = character.spellcastingAbility || "none";
+      const casterInfo = abilities.find(ability => ability.key === casterAbility);
+      const casterMod = casterInfo ? mod(character.stats[casterAbility]) : null;
+      const spellSaveDc = casterInfo ? 8 + prof + casterMod + Number(character.spellSaveDcBonus || 0) : null;
+      const attackOverride = Number(character.spellAttackBonusOverride || 0);
+      const spellAttack = casterInfo ? (attackOverride || prof + casterMod) : null;
+      const highestSlot = Object.entries(character.spellSlots || {})
+        .filter(([, slot]) => Number(slot.max || 0) > 0)
+        .map(([level]) => Number(level))
+        .sort((a, b) => b - a)[0];
 
       document.getElementById("profBonus").textContent = formatBonus(prof);
       document.getElementById("initiative").textContent = formatBonus(initiative);
       document.getElementById("passivePerception").textContent = passivePerception;
       document.getElementById("passiveInsight").textContent = passiveInsight;
+      document.getElementById("spellSaveDc").textContent = spellSaveDc === null ? "—" : spellSaveDc;
+      document.getElementById("spellAttackBonus").textContent = spellAttack === null ? "—" : formatBonus(spellAttack);
+      document.getElementById("casterAbilityLabel").textContent = casterInfo ? casterInfo.label : "None";
+      document.getElementById("highestSpellSlot").textContent = highestSlot ? `Lv. ${highestSlot}` : "—";
 
       const threatTag = document.getElementById("threatTag");
       const threat = character.threatClass || "Red";
@@ -784,6 +1039,47 @@
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
+
+    document.getElementById("portraitUpload").addEventListener("change", event => {
+      const file = event.target.files[0];
+      const character = activeCharacter();
+      if (!file || !character) return;
+      if (!file.type.startsWith("image/")) {
+        alert("Please upload an image file.");
+        event.target.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxSize = 700;
+          const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          const context = canvas.getContext("2d");
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          character.portraitUrl = canvas.toDataURL("image/jpeg", 0.72);
+          renderPortrait();
+          bindFieldValues();
+          scheduleSave();
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    });
+
+    document.getElementById("clearPortraitBtn").addEventListener("click", () => {
+      const character = activeCharacter();
+      if (!character) return;
+      character.portraitUrl = "";
+      renderPortrait();
+      bindFieldValues();
+      scheduleSave();
+    });
 
     document.getElementById("addCharacterBtn").addEventListener("click", async () => {
       try {
