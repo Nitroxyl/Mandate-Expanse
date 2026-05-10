@@ -398,9 +398,186 @@
     }
 
     .hidden { display: none !important; }
+
+    .boot-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, rgba(94, 231, 255, 0.11), transparent 26rem),
+        linear-gradient(135deg, #010204, #05070b 58%, #090d15);
+      color: var(--text);
+      transition: opacity 700ms ease, visibility 700ms ease;
+    }
+
+    .boot-screen.boot-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .boot-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.035) 0,
+        rgba(255, 255, 255, 0.035) 1px,
+        transparent 1px,
+        transparent 5px
+      );
+      opacity: 0.24;
+      pointer-events: none;
+    }
+
+    .boot-terminal {
+      width: min(760px, calc(100vw - 32px));
+      border: 1px solid rgba(94, 231, 255, 0.42);
+      border-radius: 22px;
+      background: rgba(3, 7, 13, 0.88);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.68), 0 0 42px rgba(94, 231, 255, 0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .boot-terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(94, 231, 255, 0.24);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(94, 231, 255, 0.06);
+    }
+
+    .boot-terminal-body {
+      padding: 20px;
+      font-family: var(--font-mono);
+    }
+
+    .boot-title {
+      margin: 0 0 18px;
+      font-size: clamp(1.35rem, 4vw, 2.4rem);
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: -0.04em;
+    }
+
+    .boot-lines {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .boot-line {
+      opacity: 0;
+      transform: translateY(4px);
+      animation: bootLine 420ms ease forwards;
+    }
+
+    .boot-line:nth-child(1) { animation-delay: 120ms; }
+    .boot-line:nth-child(2) { animation-delay: 420ms; }
+    .boot-line:nth-child(3) { animation-delay: 720ms; }
+    .boot-line:nth-child(4) { animation-delay: 1020ms; }
+    .boot-line:nth-child(5) { animation-delay: 1320ms; }
+    .boot-line:nth-child(6) { animation-delay: 1620ms; }
+
+    @keyframes bootLine {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .boot-progress {
+      height: 10px;
+      border: 1px solid rgba(94, 231, 255, 0.36);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 20px;
+      background: rgba(94, 231, 255, 0.06);
+    }
+
+    .boot-progress-fill {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(94, 231, 255, 0.35), var(--accent), rgba(125, 255, 178, 0.78));
+      animation: bootProgress 2.4s ease forwards;
+    }
+
+    @keyframes bootProgress {
+      0% { width: 0; }
+      28% { width: 34%; }
+      55% { width: 61%; }
+      78% { width: 86%; }
+      100% { width: 100%; }
+    }
+
+    .boot-footer {
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .boot-cursor::after {
+      content: "_";
+      color: var(--accent);
+      animation: cursorBlink 780ms steps(2, start) infinite;
+    }
+
+    @keyframes cursorBlink {
+      50% { opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .boot-line,
+      .boot-progress-fill,
+      .boot-cursor::after {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+
+      .boot-progress-fill { width: 100%; }
+    }
   </style>
 </head>
 <body>
+  <div class="boot-screen" id="bootScreen" aria-label="System boot screen">
+    <div class="boot-terminal">
+      <div class="boot-terminal-header">
+        <span>Mandate Expanse // Secure Access</span>
+        <span>LR-OS v7.4</span>
+      </div>
+      <div class="boot-terminal-body">
+        <h2 class="boot-title">The Last Recourse</h2>
+        <div class="boot-lines">
+          <div class="boot-line">&gt; Waking inmate archive...</div>
+          <div class="boot-line">&gt; Establishing Firestore uplink...</div>
+          <div class="boot-line">&gt; Verifying prisoner manifest...</div>
+          <div class="boot-line">&gt; Loading spell matrices and combat telemetry...</div>
+          <div class="boot-line">&gt; Warning: unauthorized crew activity detected.</div>
+          <div class="boot-line boot-cursor">&gt; Access granted</div>
+        </div>
+        <div class="boot-progress"><div class="boot-progress-fill"></div></div>
+        <div class="boot-footer">
+          <span>Maximum Security Archive</span>
+          <span>Stand by</span>
+        </div>
+      </div>
+    </div>
+  </div>
   <header>
     <div class="transmission-bar">
       <span class="pill danger-pill">Maximum Security Archive</span>
@@ -1174,6 +1351,27 @@
       event.target.value = "";
     });
 
+    function hideBootScreen() {
+      const bootScreen = document.getElementById("bootScreen");
+      if (!bootScreen) return;
+      bootScreen.classList.add("boot-hidden");
+      setTimeout(() => bootScreen.remove(), 900);
+    }
+
+    const minimumBootTime = new Promise(resolve => setTimeout(resolve, 2700));
+    let firstSyncComplete = false;
+
+    async function finishBootAfterFirstSync() {
+      if (firstSyncComplete) return;
+      firstSyncComplete = true;
+      await minimumBootTime;
+      hideBootScreen();
+    }
+
+    setTimeout(() => {
+      if (!firstSyncComplete) hideBootScreen();
+    }, 6500);
+
     onSnapshot(query(charactersRef, orderBy("name")), snapshot => {
       characters = snapshot.docs.map(documentSnapshot => normalizeCharacter({
         id: documentSnapshot.id,
@@ -1189,9 +1387,11 @@
       render();
       resizeAllTextareas();
       setStatus("Synced to Firestore", "ok");
+      finishBootAfterFirstSync();
     }, error => {
       console.error(error);
       setStatus("Connection failed. Check Firestore setup/rules.", "danger");
+      finishBootAfterFirstSync();
     });
   </script>
 </body>
