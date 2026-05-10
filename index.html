@@ -519,6 +519,37 @@
       100% { width: 100%; }
     }
 
+    .boot-access-form {
+      margin-top: 20px;
+      display: grid;
+      gap: 10px;
+      border-top: 1px solid rgba(94, 231, 255, 0.18);
+      padding-top: 16px;
+    }
+
+    .boot-access-form label {
+      color: var(--accent);
+      font-size: 0.76rem;
+    }
+
+    .boot-access-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    @media (max-width: 540px) {
+      .boot-access-row { grid-template-columns: 1fr; }
+    }
+
+    .boot-error {
+      min-height: 1.2em;
+      color: var(--danger);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+    }
+
     .boot-footer {
       margin-top: 14px;
       display: flex;
@@ -571,6 +602,14 @@
           <div class="boot-line boot-cursor">&gt; Access granted</div>
         </div>
         <div class="boot-progress"><div class="boot-progress-fill"></div></div>
+        <form class="boot-access-form" id="bootAccessForm">
+          <label for="bootPassword">Prison access code required</label>
+          <div class="boot-access-row">
+            <input id="bootPassword" type="password" autocomplete="off" placeholder="Enter access code" />
+            <button class="primary" type="submit">Authorize</button>
+          </div>
+          <div class="boot-error" id="bootError" aria-live="polite"></div>
+        </form>
         <div class="boot-footer">
           <span>Maximum Security Archive</span>
           <span>Stand by</span>
@@ -1351,6 +1390,11 @@
       event.target.value = "";
     });
 
+    const PRISON_ACCESS_CODE = "LR-7734-OMEGA";
+    let firstSyncComplete = false;
+    let accessAuthorized = sessionStorage.getItem("last-recourse-access-authorized") === "true";
+    const minimumBootTime = new Promise(resolve => setTimeout(resolve, 2700));
+
     function hideBootScreen() {
       const bootScreen = document.getElementById("bootScreen");
       if (!bootScreen) return;
@@ -1358,18 +1402,46 @@
       setTimeout(() => bootScreen.remove(), 900);
     }
 
-    const minimumBootTime = new Promise(resolve => setTimeout(resolve, 2700));
-    let firstSyncComplete = false;
-
-    async function finishBootAfterFirstSync() {
-      if (firstSyncComplete) return;
-      firstSyncComplete = true;
+    async function tryFinishBoot() {
+      if (!firstSyncComplete || !accessAuthorized) return;
       await minimumBootTime;
       hideBootScreen();
     }
 
+    function markFirstSyncComplete() {
+      firstSyncComplete = true;
+      tryFinishBoot();
+    }
+
+    document.getElementById("bootAccessForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const input = document.getElementById("bootPassword");
+      const error = document.getElementById("bootError");
+      const submittedCode = input.value.trim().toUpperCase();
+
+      if (submittedCode === PRISON_ACCESS_CODE) {
+        accessAuthorized = true;
+        sessionStorage.setItem("last-recourse-access-authorized", "true");
+        error.textContent = "> ACCESS CODE ACCEPTED";
+        tryFinishBoot();
+      } else {
+        accessAuthorized = false;
+        error.textContent = "> ACCESS DENIED // INVALID PRISON CODE";
+        input.value = "";
+        input.focus();
+      }
+    });
+
+    if (accessAuthorized) {
+      const error = document.getElementById("bootError");
+      error.textContent = "> SESSION ACCESS PREVIOUSLY AUTHORIZED";
+    }
+
     setTimeout(() => {
-      if (!firstSyncComplete) hideBootScreen();
+      if (!firstSyncComplete) {
+        firstSyncComplete = true;
+        tryFinishBoot();
+      }
     }, 6500);
 
     onSnapshot(query(charactersRef, orderBy("name")), snapshot => {
@@ -1387,11 +1459,11 @@
       render();
       resizeAllTextareas();
       setStatus("Synced to Firestore", "ok");
-      finishBootAfterFirstSync();
+      markFirstSyncComplete();
     }, error => {
       console.error(error);
       setStatus("Connection failed. Check Firestore setup/rules.", "danger");
-      finishBootAfterFirstSync();
+      markFirstSyncComplete();
     });
   </script>
 </body>
