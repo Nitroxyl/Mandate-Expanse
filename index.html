@@ -640,33 +640,6 @@
         </div>
 <p class="small-note">This version syncs through Firebase Firestore. Everyone using the same website and Firebase project should see the same character files.</p>
       </div>
-
-      <div class="panel-header">
-        <h2 class="panel-title">On Your Turn</h2>
-      </div>
-      <div class="panel-body stack">
-        <p class="small-note"><strong>1.</strong> Move up to your speed.</p>
-        <p class="small-note"><strong>2.</strong> Take one action.</p>
-        <p class="small-note"><strong>3.</strong> Take one bonus action if you have one.</p>
-        <p class="small-note"><strong>4.</strong> You may get one reaction before your next turn.</p>
-        <p class="small-note"><strong>5.</strong> Tell the DM what your character is trying to do.</p>
-      </div>
-
-      <div class="panel-header">
-        <h2 class="panel-title">Common Actions</h2>
-      </div>
-      <div class="panel-body stack">
-        <p class="small-note"><strong>Attack:</strong> Make a weapon or unarmed attack.</p>
-        <p class="small-note"><strong>Cast a Spell:</strong> Use a spell, if you know or prepared it.</p>
-        <p class="small-note"><strong>Dash:</strong> Move extra distance this turn.</p>
-        <p class="small-note"><strong>Disengage:</strong> Move away without provoking opportunity attacks.</p>
-        <p class="small-note"><strong>Dodge:</strong> Focus on avoiding attacks.</p>
-        <p class="small-note"><strong>Help:</strong> Give an ally advantage on something.</p>
-        <p class="small-note"><strong>Hide:</strong> Try to avoid being seen.</p>
-        <p class="small-note"><strong>Ready:</strong> Prepare an action for a trigger.</p>
-        <p class="small-note"><strong>Search:</strong> Look for something.</p>
-        <p class="small-note"><strong>Use Object:</strong> Interact with an item or device.</p>
-      </div>
     </aside>
 
     <section class="sheet-grid">
@@ -796,47 +769,11 @@
         <div class="panel-body"><table><thead><tr><th class="checkbox-cell">Prof</th><th class="checkbox-cell">Exp</th><th>Skill</th><th>Ability</th><th>Total</th></tr></thead><tbody id="skillsTable"></tbody></table></div>
       </section>
 
-      <section class="panel span-12">
-        <div class="panel-header"><h2 class="panel-title">Rest & Survival</h2></div>
-        <div class="panel-body stack">
-          <div class="row">
-            <div class="derived-grid">
-              <label class="derived-box"><span class="derived-label">Death Success 1</span><input type="checkbox" data-death-success="0" /></label>
-              <label class="derived-box"><span class="derived-label">Death Success 2</span><input type="checkbox" data-death-success="1" /></label>
-              <label class="derived-box"><span class="derived-label">Death Success 3</span><input type="checkbox" data-death-success="2" /></label>
-              <label class="derived-box"><span class="derived-label">Stabilized</span><input type="checkbox" data-field="isStable" /></label>
-            </div>
-            <div class="derived-grid">
-              <label class="derived-box"><span class="derived-label">Death Failure 1</span><input type="checkbox" data-death-failure="0" /></label>
-              <label class="derived-box"><span class="derived-label">Death Failure 2</span><input type="checkbox" data-death-failure="1" /></label>
-              <label class="derived-box"><span class="derived-label">Death Failure 3</span><input type="checkbox" data-death-failure="2" /></label>
-              <label class="derived-box"><span class="derived-label">Exhaustion</span><input type="number" min="0" max="6" data-field="exhaustion" /></label>
-            </div>
-          </div>
-          <div class="button-row">
-            <button type="button" id="shortRestBtn">Short Rest</button>
-            <button type="button" class="primary" id="longRestBtn">Long Rest</button>
-            <button type="button" id="clearDeathSavesBtn">Clear Death Saves</button>
-          </div>
-          <p class="small-note">Long Rest restores HP to max, restores all spell slots, clears death saves, and clears stabilized. Short Rest is a reminder only; spend Hit Dice manually.</p>
-        </div>
-      </section>
-
       <section class="panel span-8">
         <div class="panel-header"><h2 class="panel-title">Attacks, Features, Equipment</h2></div>
         <div class="panel-body stack">
           <label>Attacks & Spellcasting <textarea class="large-textarea" data-field="attacks" placeholder="Plasma sabre: +5 to hit, 1d8+3 radiant..."></textarea></label>
           <label>Features & Traits <textarea class="extra-large-textarea" data-field="features"></textarea></label>
-          <div class="row-3">
-            <label>Main Weapon <input data-field="mainWeapon" placeholder="Name, attack bonus, damage" /></label>
-            <label>Sidearm / Ranged Weapon <input data-field="sidearm" placeholder="Name, attack bonus, damage" /></label>
-            <label>Armor <input data-field="equippedArmor" placeholder="Armor name / shield" /></label>
-          </div>
-          <div class="row-3">
-            <label>Special Item <input data-field="specialItem" /></label>
-            <label>Consumables <input data-field="consumables" placeholder="Med-gel x2, grenades x1..." /></label>
-            <label>Credits / Currency <input data-field="currency" /></label>
-          </div>
           <label>Inventory <textarea class="large-textarea" data-field="inventory"></textarea></label>
         </div>
       </section>
@@ -955,16 +892,6 @@
       spellAttackBonusOverride: 0,
       spellsKnown: "",
       spellSlots: Object.fromEntries(Array.from({ length: 9 }, (_, index) => [String(index + 1), { max: 0, current: 0 }])),
-      deathSaveSuccesses: [false, false, false],
-      deathSaveFailures: [false, false, false],
-      isStable: false,
-      exhaustion: 0,
-      mainWeapon: "",
-      sidearm: "",
-      equippedArmor: "",
-      specialItem: "",
-      consumables: "",
-      currency: "",
       notes: "",
       stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       saveProficiencies: { str: false, dex: false, con: false, int: false, wis: false, cha: false },
@@ -1002,9 +929,7 @@
         saveProficiencies: { ...base.saveProficiencies, ...(character.saveProficiencies || {}) },
         skillProficiencies: { ...base.skillProficiencies, ...(character.skillProficiencies || {}) },
         skillExpertise: { ...base.skillExpertise, ...(character.skillExpertise || {}) },
-        spellSlots: mergeSpellSlots(base.spellSlots, character.spellSlots || {}),
-        deathSaveSuccesses: Array.isArray(character.deathSaveSuccesses) ? base.deathSaveSuccesses.map((_, index) => Boolean(character.deathSaveSuccesses[index])) : base.deathSaveSuccesses,
-        deathSaveFailures: Array.isArray(character.deathSaveFailures) ? base.deathSaveFailures.map((_, index) => Boolean(character.deathSaveFailures[index])) : base.deathSaveFailures
+        spellSlots: mergeSpellSlots(base.spellSlots, character.spellSlots || {})
       };
     }
 
@@ -1068,7 +993,6 @@
       renderSaves();
       renderSkills();
       renderSpellSlots();
-      renderDeathSaves();
       bindFieldValues();
       renderPortrait();
       renderDerivedValues();
@@ -1282,31 +1206,6 @@
       document.querySelectorAll("textarea").forEach(autoResizeTextarea);
     }
 
-    function renderDeathSaves() {
-      const character = activeCharacter();
-      if (!character) return;
-
-      document.querySelectorAll("[data-death-success]").forEach(input => {
-        const index = Number(input.dataset.deathSuccess);
-        input.checked = Boolean(character.deathSaveSuccesses?.[index]);
-        input.onchange = event => {
-          character.deathSaveSuccesses[index] = event.target.checked;
-          scheduleSave();
-        };
-        field.oninput = fieldHandler;
-        field.onchange = fieldHandler;
-      });
-
-      document.querySelectorAll("[data-death-failure]").forEach(input => {
-        const index = Number(input.dataset.deathFailure);
-        input.checked = Boolean(character.deathSaveFailures?.[index]);
-        input.onchange = event => {
-          character.deathSaveFailures[index] = event.target.checked;
-          scheduleSave();
-        };
-      });
-    }
-
     function bindFieldValues() {
       const character = activeCharacter();
       document.querySelectorAll("[data-field]").forEach(field => {
@@ -1317,17 +1216,11 @@
         }
         field.disabled = false;
         const key = field.dataset.field;
-        if (field.type === "checkbox") {
-          field.checked = Boolean(character[key]);
-        } else {
-          field.value = character[key] ?? "";
-        }
+        field.value = character[key] ?? "";
         autoResizeTextarea(field);
-        const fieldHandler = event => {
+        field.oninput = event => {
           autoResizeTextarea(field);
-          if (field.type === "number") character[key] = Number(event.target.value || 0);
-          else if (field.type === "checkbox") character[key] = event.target.checked;
-          else character[key] = event.target.value;
+          character[key] = field.type === "number" ? Number(event.target.value || 0) : event.target.value;
           if (["name", "className", "level", "threatClass"].includes(key)) {
             renderCharacterList();
             renderDerivedValues();
@@ -1387,38 +1280,6 @@
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
-
-    document.getElementById("shortRestBtn").addEventListener("click", () => {
-      alert("Short Rest: spend Hit Dice manually, recover short-rest abilities if your class has them, and ask the DM if anything else changes.");
-    });
-
-    document.getElementById("longRestBtn").addEventListener("click", () => {
-      const character = activeCharacter();
-      if (!character) return;
-      const confirmed = confirm("Apply Long Rest? This restores HP to max, restores all spell slots, and clears death saves.");
-      if (!confirmed) return;
-      character.currentHp = Number(character.maxHp || character.currentHp || 0);
-      for (let level = 1; level <= 9; level++) {
-        const key = String(level);
-        character.spellSlots[key].current = Number(character.spellSlots[key].max || 0);
-      }
-      character.deathSaveSuccesses = [false, false, false];
-      character.deathSaveFailures = [false, false, false];
-      character.isStable = false;
-      render();
-      scheduleSave();
-    });
-
-    document.getElementById("clearDeathSavesBtn").addEventListener("click", () => {
-      const character = activeCharacter();
-      if (!character) return;
-      character.deathSaveSuccesses = [false, false, false];
-      character.deathSaveFailures = [false, false, false];
-      character.isStable = false;
-      renderDeathSaves();
-      bindFieldValues();
-      scheduleSave();
-    });
 
     document.getElementById("portraitUpload").addEventListener("change", event => {
       const file = event.target.files[0];
