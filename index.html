@@ -638,12 +638,7 @@
           <button class="primary" id="addCharacterBtn">New File</button>
           <button class="danger" id="deleteCharacterBtn">Delete</button>
         </div>
-        <div class="button-row">
-          <button id="exportBtn">Export JSON</button>
-          <button id="importBtn">Import JSON</button>
-          <input class="hidden" type="file" id="importFile" accept="application/json" />
-        </div>
-        <p class="small-note">This version syncs through Firebase Firestore. Everyone using the same website and Firebase project should see the same character files.</p>
+<p class="small-note">This version syncs through Firebase Firestore. Everyone using the same website and Firebase project should see the same character files.</p>
       </div>
     </aside>
 
@@ -1352,42 +1347,6 @@
         console.error(error);
         setStatus("Delete failed. Check Firestore rules.", "danger");
       }
-    });
-
-    document.getElementById("exportBtn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify({ characters }, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "last-recourse-character-sheets.json";
-      link.click();
-      URL.revokeObjectURL(url);
-    });
-
-    document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
-
-    document.getElementById("importFile").addEventListener("change", event => {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const imported = JSON.parse(reader.result);
-          if (!imported.characters?.length) throw new Error("Invalid file format");
-          setStatus("Importing files...", "warn");
-          for (const character of imported.characters) {
-            const { id, ...data } = normalizeCharacter(character);
-            await addDoc(charactersRef, { ...data, importedAt: serverTimestamp(), updatedAt: serverTimestamp() });
-          }
-          setStatus("Import complete", "ok");
-        } catch (error) {
-          console.error(error);
-          alert("Could not import that JSON file. Make sure it was exported from this archive.");
-          setStatus("Import failed", "danger");
-        }
-      };
-      reader.readAsText(file);
-      event.target.value = "";
     });
 
     const PRISON_ACCESS_CODE = "LR-7734-OMEGA";
