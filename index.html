@@ -163,17 +163,9 @@
       overflow-y: hidden;
     }
 
-    textarea.compact-textarea {
-      min-height: 120px;
-    }
-
-    textarea.large-textarea {
-      min-height: 320px;
-    }
-
-    textarea.extra-large-textarea {
-      min-height: 460px;
-    }
+    textarea.compact-textarea { min-height: 120px; }
+    textarea.large-textarea { min-height: 320px; }
+    textarea.extra-large-textarea { min-height: 460px; }
 
     input:focus, select:focus, textarea:focus {
       border-color: var(--accent);
@@ -297,47 +289,6 @@
       letter-spacing: 0.08em;
     }
 
-    .slot-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    @media (max-width: 780px) { .slot-grid { grid-template-columns: 1fr; } }
-
-    .slot-card {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 10px;
-      background: rgba(5, 9, 16, 0.72);
-      display: grid;
-      gap: 8px;
-    }
-
-    .slot-title {
-      font-family: var(--font-mono);
-      color: var(--accent);
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .slot-controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .slot-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .slot-buttons button {
-      flex: 1;
-      padding: 7px 8px;
-    }
-
     .derived-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
     @media (max-width: 720px) { .derived-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
@@ -363,6 +314,98 @@
       font-size: 1.5rem;
       color: var(--text);
     }
+
+    .slot-grid, .resonance-action-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 780px) { .slot-grid, .resonance-action-grid { grid-template-columns: 1fr; } }
+
+    .slot-card, .resonance-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(5, 9, 16, 0.72);
+      display: grid;
+      gap: 8px;
+    }
+
+    .slot-title, .resonance-card-title {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .slot-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .slot-buttons { display: flex; gap: 8px; }
+    .slot-buttons button { flex: 1; padding: 7px 8px; }
+
+    .resonance-meter {
+      display: grid;
+      grid-template-columns: 160px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    @media (max-width: 780px) { .resonance-meter { grid-template-columns: 1fr; } }
+
+    .resonance-bar {
+      height: 14px;
+      border: 1px solid rgba(94, 231, 255, 0.36);
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(94, 231, 255, 0.06);
+      margin-bottom: 11px;
+    }
+
+    .resonance-bar-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, rgba(94, 231, 255, 0.44), var(--accent), rgba(125, 255, 178, 0.78));
+      transition: width 180ms ease;
+    }
+
+    .strain-track {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .strain-dot {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px;
+      text-align: center;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      background: rgba(5, 9, 16, 0.72);
+    }
+
+    .strain-dot.active {
+      border-color: rgba(255, 94, 122, 0.68);
+      color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(255, 94, 122, 0.08);
+    }
+
+    .quick-reference {
+      border: 1px solid rgba(94, 231, 255, 0.22);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(5, 9, 16, 0.50);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .quick-reference strong { color: var(--text); }
 
     table { width: 100%; border-collapse: collapse; }
     th, td { border-bottom: 1px solid rgba(38, 54, 79, 0.9); padding: 8px 6px; text-align: left; font-size: 0.9rem; }
@@ -422,13 +465,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background-image: repeating-linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.035) 0,
-        rgba(255, 255, 255, 0.035) 1px,
-        transparent 1px,
-        transparent 5px
-      );
+      background-image: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 0, rgba(255, 255, 255, 0.035) 1px, transparent 1px, transparent 5px);
       opacity: 0.24;
       pointer-events: none;
     }
@@ -458,10 +495,7 @@
       background: rgba(94, 231, 255, 0.06);
     }
 
-    .boot-terminal-body {
-      padding: 20px;
-      font-family: var(--font-mono);
-    }
+    .boot-terminal-body { padding: 20px; font-family: var(--font-mono); }
 
     .boot-title {
       margin: 0 0 18px;
@@ -471,19 +505,8 @@
       letter-spacing: -0.04em;
     }
 
-    .boot-lines {
-      display: grid;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .boot-line {
-      opacity: 0;
-      transform: translateY(4px);
-      animation: bootLine 420ms ease forwards;
-    }
-
+    .boot-lines { display: grid; gap: 8px; color: var(--muted); font-size: 0.88rem; }
+    .boot-line { opacity: 0; transform: translateY(4px); animation: bootLine 420ms ease forwards; }
     .boot-line:nth-child(1) { animation-delay: 120ms; }
     .boot-line:nth-child(2) { animation-delay: 420ms; }
     .boot-line:nth-child(3) { animation-delay: 720ms; }
@@ -491,9 +514,7 @@
     .boot-line:nth-child(5) { animation-delay: 1320ms; }
     .boot-line:nth-child(6) { animation-delay: 1620ms; }
 
-    @keyframes bootLine {
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes bootLine { to { opacity: 1; transform: translateY(0); } }
 
     .boot-progress {
       height: 10px;
@@ -527,20 +548,9 @@
       padding-top: 16px;
     }
 
-    .boot-access-form label {
-      color: var(--accent);
-      font-size: 0.76rem;
-    }
-
-    .boot-access-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-    }
-
-    @media (max-width: 540px) {
-      .boot-access-row { grid-template-columns: 1fr; }
-    }
+    .boot-access-form label { color: var(--accent); font-size: 0.76rem; }
+    .boot-access-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+    @media (max-width: 540px) { .boot-access-row { grid-template-columns: 1fr; } }
 
     .boot-error {
       min-height: 1.2em;
@@ -567,19 +577,10 @@
       animation: cursorBlink 780ms steps(2, start) infinite;
     }
 
-    @keyframes cursorBlink {
-      50% { opacity: 0; }
-    }
+    @keyframes cursorBlink { 50% { opacity: 0; } }
 
     @media (prefers-reduced-motion: reduce) {
-      .boot-line,
-      .boot-progress-fill,
-      .boot-cursor::after {
-        animation: none;
-        opacity: 1;
-        transform: none;
-      }
-
+      .boot-line, .boot-progress-fill, .boot-cursor::after { animation: none; opacity: 1; transform: none; }
       .boot-progress-fill { width: 100%; }
     }
   </style>
@@ -599,7 +600,7 @@
           <div class="boot-line">&gt; Verifying prisoner manifest...</div>
           <div class="boot-line">&gt; Loading spell matrices and combat telemetry...</div>
           <div class="boot-line">&gt; Warning: unauthorized crew activity detected.</div>
-          <div class="boot-line boot-cursor">&gt; Access granted</div>
+          <div class="boot-line boot-cursor">&gt; Access code required</div>
         </div>
         <div class="boot-progress"><div class="boot-progress-fill"></div></div>
         <form class="boot-access-form" id="bootAccessForm">
@@ -617,6 +618,7 @@
       </div>
     </div>
   </div>
+
   <header>
     <div class="transmission-bar">
       <span class="pill danger-pill">Maximum Security Archive</span>
@@ -638,7 +640,12 @@
           <button class="primary" id="addCharacterBtn">New File</button>
           <button class="danger" id="deleteCharacterBtn">Delete</button>
         </div>
-<p class="small-note">This version syncs through Firebase Firestore. Everyone using the same website and Firebase project should see the same character files.</p>
+        <div class="button-row">
+          <button id="exportBtn">Export JSON</button>
+          <button id="importBtn">Import JSON</button>
+          <input class="hidden" type="file" id="importFile" accept="application/json" />
+        </div>
+        <p class="small-note">This version syncs through Firebase Firestore. Everyone using the same website and Firebase project should see the same character files.</p>
       </div>
     </aside>
 
@@ -681,15 +688,11 @@
         </div>
         <div class="panel-body">
           <div class="portrait-wrap">
-            <div class="portrait-frame" id="portraitFrame">
-              <div class="portrait-placeholder">No portrait uploaded</div>
-            </div>
+            <div class="portrait-frame" id="portraitFrame"><div class="portrait-placeholder">No portrait uploaded</div></div>
             <div class="stack">
               <label>Image URL <input data-field="portraitUrl" placeholder="Paste image URL, or upload a file below" /></label>
               <label>Upload Portrait <input type="file" id="portraitUpload" accept="image/*" /></label>
-              <div class="button-row">
-                <button id="clearPortraitBtn" type="button">Clear Portrait</button>
-              </div>
+              <div class="button-row"><button id="clearPortraitBtn" type="button">Clear Portrait</button></div>
               <p class="small-note">Uploaded files are compressed to keep Firestore usage reasonable. Use portraits/tokens, not full-resolution artwork.</p>
             </div>
           </div>
@@ -728,6 +731,66 @@
 
       <section class="panel span-12">
         <div class="panel-header">
+          <h2 class="panel-title">Resonance System</h2>
+          <span class="tag">Seed-fragment attunement tracker</span>
+        </div>
+        <div class="panel-body stack">
+          <div class="row-3">
+            <label>Reserve Roll d100 <input type="number" min="1" max="100" data-field="resonanceReserveRoll" /></label>
+            <label>Output Roll d100 <input type="number" min="1" max="100" data-field="resonanceOutputRoll" /></label>
+            <label>Efficiency Roll d100 <input type="number" min="1" max="100" data-field="resonanceEfficiencyRoll" /></label>
+          </div>
+          <div class="button-row">
+            <button id="rollResonanceBtn" type="button">Roll All Resonance Stats</button>
+            <button id="restoreRpBtn" type="button">Restore RP</button>
+            <button id="longRestResonanceBtn" type="button">Long Rest Reset</button>
+          </div>
+          <div class="derived-grid">
+            <div class="derived-box"><span class="derived-label">Reserve Grade</span><span class="derived-value" id="reserveGrade">—</span></div>
+            <div class="derived-box"><span class="derived-label">Max RP</span><span class="derived-value" id="maxRp">—</span></div>
+            <div class="derived-box"><span class="derived-label">Output Grade</span><span class="derived-value" id="outputGrade">—</span></div>
+            <div class="derived-box"><span class="derived-label">Output / Turn</span><span class="derived-value" id="outputMax">—</span></div>
+            <div class="derived-box"><span class="derived-label">Efficiency Grade</span><span class="derived-value" id="efficiencyGrade">—</span></div>
+            <div class="derived-box"><span class="derived-label">Efficiency Modifier</span><span class="derived-value" id="efficiencyMod">—</span></div>
+            <div class="derived-box"><span class="derived-label">Resonance Die</span><span class="derived-value" id="resonanceDie">—</span></div>
+            <div class="derived-box"><span class="derived-label">Resonance Check</span><span class="derived-value" id="resonanceCheckTotal">—</span></div>
+          </div>
+          <div class="row-3">
+            <label>Current RP <input type="number" min="0" data-field="resonanceCurrentRp" /></label>
+            <label>Check Ability
+              <select data-field="resonanceCheckAbility">
+                <option value="str">Strength</option>
+                <option value="dex">Dexterity</option>
+                <option value="con">Constitution</option>
+                <option value="int">Intelligence</option>
+                <option value="wis">Wisdom</option>
+                <option value="cha">Charisma</option>
+              </select>
+            </label>
+            <label>Law Strain <input type="number" min="0" max="6" data-field="lawStrain" /></label>
+          </div>
+          <div class="resonance-meter">
+            <label>RP Meter <input type="text" id="rpMeterText" readonly /></label>
+            <div class="resonance-bar"><div class="resonance-bar-fill" id="rpBarFill"></div></div>
+            <div class="button-row">
+              <button type="button" data-rp-spend="1">Spend 1 RP</button>
+              <button type="button" data-rp-spend="2">Spend 2 RP</button>
+              <button type="button" id="spendOutputBtn">Spend Output</button>
+            </div>
+          </div>
+          <div class="strain-track" id="strainTrack"></div>
+          <div class="quick-reference" id="lawStrainEffect">Law Strain effect appears here.</div>
+          <div class="resonance-action-grid">
+            <div class="resonance-card"><div class="resonance-card-title">1 RP Uses</div><div>Reinforce Attack, Reinforce Defense, Reinforce Body, Guard, Flow Step, Sense Resonance.</div></div>
+            <div class="resonance-card"><div class="resonance-card-title">2 RP Uses</div><div>Sharpen Technique, Bend Technique, Clash.</div></div>
+            <div class="resonance-card"><div class="resonance-card-title">Maximum Output</div><div>Spend up to full Output on one action. Extra RP beyond normal cost adds extra Resonance dice. Full Output may trigger Law Strain.</div></div>
+          </div>
+          <label>Resonance Technique Notes <textarea class="large-textarea" data-field="resonanceNotes" placeholder="Custom tricks, personal technique flavor, Seed scars, Law Strain visuals, Maximum Output style..."></textarea></label>
+        </div>
+      </section>
+
+      <section class="panel span-12">
+        <div class="panel-header">
           <h2 class="panel-title">Spellcasting</h2>
           <span class="tag">Slots sync in real time</span>
         </div>
@@ -759,8 +822,7 @@
       </section>
 
       <section class="panel span-6">
-        <div class="panel-header">
-          <h2 class="panel-title">Saving Throws</h2></div>
+        <div class="panel-header"><h2 class="panel-title">Saving Throws</h2></div>
         <div class="panel-body"><table><thead><tr><th class="checkbox-cell">Prof</th><th>Save</th><th>Ability</th><th>Total</th></tr></thead><tbody id="savesTable"></tbody></table></div>
       </section>
 
@@ -842,6 +904,7 @@
     };
 
     const CAMPAIGN_ID = "mandate-expanse";
+    const PRISON_ACCESS_CODE = "LR-7734-OMEGA";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -877,6 +940,18 @@
       ["survival", "Survival", "wis"]
     ];
 
+    const lawStrainEffects = {
+      0: "No Law Strain. Reality is stable, at least for now.",
+      1: "Cosmetic distortion: glowing veins, static in the voice, gravity flicker, or delayed shadow.",
+      2: "The DM may add a small complication when this character uses Resonance.",
+      3: "Disadvantage on the next Resonance Check this character makes.",
+      4: "Suffer one level of exhaustion, or take psychic/force damage equal to level x 2.",
+      5: "Reality rejects the character. Resonance cannot be used until a short rest, and something notices.",
+      6: "Seed Echo. Serious consequence, vision, enemy reaction, Dark Demise trace, or temporary mutation."
+    };
+
+    const defaultSpellSlots = () => Object.fromEntries(Array.from({ length: 9 }, (_, index) => [String(index + 1), { max: 0, current: 0 }]));
+
     const defaultCharacter = () => ({
       name: "New Inmate",
       player: "",
@@ -911,7 +986,14 @@
       spellSaveDcBonus: 0,
       spellAttackBonusOverride: 0,
       spellsKnown: "",
-      spellSlots: Object.fromEntries(Array.from({ length: 9 }, (_, index) => [String(index + 1), { max: 0, current: 0 }])),
+      spellSlots: defaultSpellSlots(),
+      resonanceReserveRoll: 0,
+      resonanceOutputRoll: 0,
+      resonanceEfficiencyRoll: 0,
+      resonanceCurrentRp: 0,
+      resonanceCheckAbility: "dex",
+      resonanceNotes: "",
+      lawStrain: 0,
       notes: "",
       stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
       saveProficiencies: { str: false, dex: false, con: false, int: false, wis: false, cha: false },
@@ -925,6 +1007,9 @@
     let activeId = null;
     let saveTimer = null;
     let isRemoteRender = false;
+    let firstSyncComplete = false;
+    let accessAuthorized = sessionStorage.getItem("last-recourse-access-authorized") === "true";
+    const minimumBootTime = new Promise(resolve => setTimeout(resolve, 2700));
 
     const statusEl = document.getElementById("connectionStatus");
 
@@ -940,6 +1025,18 @@
       return characters.find(character => character.id === activeId) || characters[0];
     }
 
+    function mergeSpellSlots(baseSlots, incomingSlots) {
+      const merged = structuredClone(baseSlots);
+      for (let level = 1; level <= 9; level++) {
+        const key = String(level);
+        merged[key] = {
+          max: Number(incomingSlots?.[key]?.max || 0),
+          current: Number(incomingSlots?.[key]?.current || 0)
+        };
+      }
+      return merged;
+    }
+
     function normalizeCharacter(character) {
       const base = defaultCharacter();
       return {
@@ -953,21 +1050,10 @@
       };
     }
 
-    function mergeSpellSlots(baseSlots, incomingSlots) {
-      const merged = structuredClone(baseSlots);
-      for (let level = 1; level <= 9; level++) {
-        const key = String(level);
-        merged[key] = {
-          max: Number(incomingSlots[key]?.max || 0),
-          current: Number(incomingSlots[key]?.current || 0)
-        };
-      }
-      return merged;
-    }
-
     function mod(score) { return Math.floor((Number(score || 0) - 10) / 2); }
     function proficiencyBonus(level) { return Math.ceil(Number(level || 1) / 4) + 1; }
     function formatBonus(value) { const num = Number(value || 0); return num >= 0 ? `+${num}` : `${num}`; }
+    function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value || 0))); }
 
     function skillTotal(character, skillKey, abilityKey) {
       const base = mod(character.stats[abilityKey]);
@@ -983,6 +1069,56 @@
       return mod(character.stats[abilityKey]) + (character.saveProficiencies[abilityKey] ? proficiencyBonus(character.level) : 0);
     }
 
+    function reserveInfo(roll) {
+      const value = Number(roll || 0);
+      if (value >= 95) return { grade: "Abnormal", base: 12 };
+      if (value >= 76) return { grade: "Vast", base: 9 };
+      if (value >= 46) return { grade: "Dense", base: 7 };
+      if (value >= 11) return { grade: "Ordinary", base: 5 };
+      if (value >= 1) return { grade: "Starved", base: 3 };
+      return { grade: "Unrolled", base: 0 };
+    }
+
+    function outputInfo(roll) {
+      const value = Number(roll || 0);
+      if (value >= 98) return { grade: "Catastrophic", base: 5 };
+      if (value >= 86) return { grade: "Violent", base: 4 };
+      if (value >= 61) return { grade: "Forceful", base: 3 };
+      if (value >= 16) return { grade: "Stable", base: 2 };
+      if (value >= 1) return { grade: "Suppressed", base: 1 };
+      return { grade: "Unrolled", base: 0 };
+    }
+
+    function efficiencyInfo(roll) {
+      const value = Number(roll || 0);
+      if (value >= 97) return { grade: "Near-Perfect", modifier: 4 };
+      if (value >= 81) return { grade: "Refined", modifier: 3 };
+      if (value >= 56) return { grade: "Trained", modifier: 2 };
+      if (value >= 16) return { grade: "Rough", modifier: 1 };
+      if (value >= 1) return { grade: "Wasteful", modifier: 0 };
+      return { grade: "Unrolled", modifier: 0 };
+    }
+
+    function resonanceDie(level) {
+      const value = Number(level || 1);
+      if (value >= 17) return "d12";
+      if (value >= 11) return "d10";
+      if (value >= 5) return "d8";
+      return "d6";
+    }
+
+    function maxResonanceRp(character) {
+      const info = reserveInfo(character.resonanceReserveRoll);
+      if (!Number(character.resonanceReserveRoll || 0)) return 0;
+      return Math.max(3, info.base + proficiencyBonus(character.level) + mod(character.stats.con));
+    }
+
+    function maxResonanceOutput(character) {
+      const info = outputInfo(character.resonanceOutputRoll);
+      if (!Number(character.resonanceOutputRoll || 0)) return 0;
+      return info.base + proficiencyBonus(character.level);
+    }
+
     function scheduleSave() {
       if (isRemoteRender) return;
       clearTimeout(saveTimer);
@@ -995,10 +1131,7 @@
       if (!character?.id) return;
       const { id, ...data } = character;
       try {
-        await setDoc(doc(db, "campaigns", CAMPAIGN_ID, "characters", id), {
-          ...data,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
+        await setDoc(doc(db, "campaigns", CAMPAIGN_ID, "characters", id), { ...data, updatedAt: serverTimestamp() }, { merge: true });
         setStatus("Synced to Firestore", "ok");
       } catch (error) {
         console.error(error);
@@ -1035,10 +1168,7 @@
           <p>${escapeHtml(character.className || "Class Unknown")} · Level ${Number(character.level || 1)}</p>
           <p>${escapeHtml(character.inmateNumber || "No registry number")}</p>
         `;
-        card.addEventListener("click", () => {
-          activeId = character.id;
-          render();
-        });
+        card.addEventListener("click", () => { activeId = character.id; render(); });
         list.appendChild(card);
       });
     }
@@ -1063,10 +1193,13 @@
       grid.querySelectorAll("[data-stat]").forEach(input => {
         input.addEventListener("input", event => {
           character.stats[event.target.dataset.stat] = Number(event.target.value || 0);
+          const maxRp = maxResonanceRp(character);
+          if (maxRp && Number(character.resonanceCurrentRp || 0) > maxRp) character.resonanceCurrentRp = maxRp;
           renderStatGrid();
           renderSaves();
           renderSkills();
           renderSpellSlots();
+          bindFieldValues();
           renderDerivedValues();
           scheduleSave();
         });
@@ -1222,9 +1355,7 @@
       textarea.style.height = `${Math.max(textarea.scrollHeight + 2, parseInt(getComputedStyle(textarea).minHeight, 10) || 180)}px`;
     }
 
-    function resizeAllTextareas() {
-      document.querySelectorAll("textarea").forEach(autoResizeTextarea);
-    }
+    function resizeAllTextareas() { document.querySelectorAll("textarea").forEach(autoResizeTextarea); }
 
     function bindFieldValues() {
       const character = activeCharacter();
@@ -1240,11 +1371,28 @@
         autoResizeTextarea(field);
         field.oninput = event => {
           autoResizeTextarea(field);
-          character[key] = field.type === "number" ? Number(event.target.value || 0) : event.target.value;
+          let value = field.type === "number" ? Number(event.target.value || 0) : event.target.value;
+          if (["resonanceReserveRoll", "resonanceOutputRoll", "resonanceEfficiencyRoll"].includes(key)) value = clamp(value, 0, 100);
+          if (key === "lawStrain") value = clamp(value, 0, 6);
+          character[key] = value;
+
+          if (key === "resonanceCurrentRp") {
+            const maxRp = maxResonanceRp(character);
+            character.resonanceCurrentRp = maxRp ? clamp(value, 0, maxRp) : Math.max(0, value);
+          }
+
+          if (["resonanceReserveRoll", "resonanceOutputRoll", "resonanceEfficiencyRoll"].includes(key)) {
+            const maxRp = maxResonanceRp(character);
+            if (maxRp && (!character.resonanceCurrentRp || Number(character.resonanceCurrentRp) > maxRp)) character.resonanceCurrentRp = maxRp;
+            bindFieldValues();
+          }
+
           if (["name", "className", "level", "threatClass"].includes(key)) {
             renderCharacterList();
             renderDerivedValues();
           } else if (["spellcastingAbility", "spellSaveDcBonus", "spellAttackBonusOverride"].includes(key)) {
+            renderDerivedValues();
+          } else if (["resonanceReserveRoll", "resonanceOutputRoll", "resonanceEfficiencyRoll", "resonanceCurrentRp", "resonanceCheckAbility", "lawStrain"].includes(key)) {
             renderDerivedValues();
           } else if (key === "portraitUrl") {
             renderPortrait();
@@ -1269,10 +1417,19 @@
       const spellSaveDc = casterInfo ? 8 + prof + casterMod + Number(character.spellSaveDcBonus || 0) : null;
       const attackOverride = Number(character.spellAttackBonusOverride || 0);
       const spellAttack = casterInfo ? (attackOverride || prof + casterMod) : null;
-      const highestSlot = Object.entries(character.spellSlots || {})
-        .filter(([, slot]) => Number(slot.max || 0) > 0)
-        .map(([level]) => Number(level))
-        .sort((a, b) => b - a)[0];
+      const highestSlot = Object.entries(character.spellSlots || {}).filter(([, slot]) => Number(slot.max || 0) > 0).map(([level]) => Number(level)).sort((a, b) => b - a)[0];
+
+      const reserve = reserveInfo(character.resonanceReserveRoll);
+      const output = outputInfo(character.resonanceOutputRoll);
+      const efficiency = efficiencyInfo(character.resonanceEfficiencyRoll);
+      const maxRp = maxResonanceRp(character);
+      const maxOutput = maxResonanceOutput(character);
+      const checkAbility = character.resonanceCheckAbility || "dex";
+      const resonanceCheck = efficiency.modifier + mod(character.stats[checkAbility]);
+      const currentRp = clamp(character.resonanceCurrentRp, 0, maxRp || 999);
+      if (currentRp !== Number(character.resonanceCurrentRp || 0)) character.resonanceCurrentRp = currentRp;
+      const rpPercent = maxRp ? Math.round((currentRp / maxRp) * 100) : 0;
+      const strain = clamp(character.lawStrain, 0, 6);
 
       document.getElementById("profBonus").textContent = formatBonus(prof);
       document.getElementById("initiative").textContent = formatBonus(initiative);
@@ -1282,6 +1439,27 @@
       document.getElementById("spellAttackBonus").textContent = spellAttack === null ? "—" : formatBonus(spellAttack);
       document.getElementById("casterAbilityLabel").textContent = casterInfo ? casterInfo.label : "None";
       document.getElementById("highestSpellSlot").textContent = highestSlot ? `Lv. ${highestSlot}` : "—";
+
+      document.getElementById("reserveGrade").textContent = reserve.grade;
+      document.getElementById("maxRp").textContent = maxRp || "—";
+      document.getElementById("outputGrade").textContent = output.grade;
+      document.getElementById("outputMax").textContent = maxOutput || "—";
+      document.getElementById("efficiencyGrade").textContent = efficiency.grade;
+      document.getElementById("efficiencyMod").textContent = formatBonus(efficiency.modifier);
+      document.getElementById("resonanceDie").textContent = resonanceDie(character.level);
+      document.getElementById("resonanceCheckTotal").textContent = `${formatBonus(resonanceCheck)} ${checkAbility.toUpperCase()}`;
+      document.getElementById("rpMeterText").value = maxRp ? `${currentRp} / ${maxRp} RP` : "Roll Reserve first";
+      document.getElementById("rpBarFill").style.width = `${rpPercent}%`;
+
+      const strainTrack = document.getElementById("strainTrack");
+      strainTrack.innerHTML = "";
+      for (let i = 1; i <= 6; i++) {
+        const dot = document.createElement("div");
+        dot.className = `strain-dot ${i <= strain ? "active" : ""}`;
+        dot.textContent = i;
+        strainTrack.appendChild(dot);
+      }
+      document.getElementById("lawStrainEffect").textContent = lawStrainEffects[strain] || lawStrainEffects[0];
 
       const threatTag = document.getElementById("threatTag");
       const threat = character.threatClass || "Red";
@@ -1300,6 +1478,62 @@
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
+
+    function spendRp(amount) {
+      const character = activeCharacter();
+      if (!character) return;
+      const maxRp = maxResonanceRp(character);
+      character.resonanceCurrentRp = clamp(Number(character.resonanceCurrentRp || 0) - amount, 0, maxRp || 999);
+      bindFieldValues();
+      renderDerivedValues();
+      scheduleSave();
+    }
+
+    function hideBootScreen() {
+      const bootScreen = document.getElementById("bootScreen");
+      if (!bootScreen) return;
+      bootScreen.classList.add("boot-hidden");
+      setTimeout(() => bootScreen.remove(), 900);
+    }
+
+    async function tryFinishBoot() {
+      if (!firstSyncComplete || !accessAuthorized) return;
+      await minimumBootTime;
+      hideBootScreen();
+    }
+
+    function markFirstSyncComplete() {
+      firstSyncComplete = true;
+      tryFinishBoot();
+    }
+
+    document.getElementById("bootAccessForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const input = document.getElementById("bootPassword");
+      const error = document.getElementById("bootError");
+      const submittedCode = input.value.trim().toUpperCase();
+
+      if (submittedCode === PRISON_ACCESS_CODE) {
+        accessAuthorized = true;
+        sessionStorage.setItem("last-recourse-access-authorized", "true");
+        error.textContent = "> ACCESS CODE ACCEPTED";
+        tryFinishBoot();
+      } else {
+        accessAuthorized = false;
+        error.textContent = "> ACCESS DENIED // INVALID PRISON CODE";
+        input.value = "";
+        input.focus();
+      }
+    });
+
+    if (accessAuthorized) document.getElementById("bootError").textContent = "> SESSION ACCESS PREVIOUSLY AUTHORIZED";
+
+    setTimeout(() => {
+      if (!firstSyncComplete) {
+        firstSyncComplete = true;
+        tryFinishBoot();
+      }
+    }, 6500);
 
     document.getElementById("portraitUpload").addEventListener("change", event => {
       const file = event.target.files[0];
@@ -1342,6 +1576,47 @@
       scheduleSave();
     });
 
+    document.getElementById("rollResonanceBtn").addEventListener("click", () => {
+      const character = activeCharacter();
+      if (!character) return;
+      character.resonanceReserveRoll = Math.floor(Math.random() * 100) + 1;
+      character.resonanceOutputRoll = Math.floor(Math.random() * 100) + 1;
+      character.resonanceEfficiencyRoll = Math.floor(Math.random() * 100) + 1;
+      character.resonanceCurrentRp = maxResonanceRp(character);
+      bindFieldValues();
+      renderDerivedValues();
+      scheduleSave();
+    });
+
+    document.getElementById("restoreRpBtn").addEventListener("click", () => {
+      const character = activeCharacter();
+      if (!character) return;
+      character.resonanceCurrentRp = maxResonanceRp(character);
+      bindFieldValues();
+      renderDerivedValues();
+      scheduleSave();
+    });
+
+    document.getElementById("longRestResonanceBtn").addEventListener("click", () => {
+      const character = activeCharacter();
+      if (!character) return;
+      character.resonanceCurrentRp = maxResonanceRp(character);
+      character.lawStrain = 0;
+      bindFieldValues();
+      renderDerivedValues();
+      scheduleSave();
+    });
+
+    document.querySelectorAll("[data-rp-spend]").forEach(button => {
+      button.addEventListener("click", event => spendRp(Number(event.target.dataset.rpSpend || 0)));
+    });
+
+    document.getElementById("spendOutputBtn").addEventListener("click", () => {
+      const character = activeCharacter();
+      if (!character) return;
+      spendRp(maxResonanceOutput(character));
+    });
+
     document.getElementById("addCharacterBtn").addEventListener("click", async () => {
       try {
         setStatus("Creating file...", "warn");
@@ -1369,71 +1644,47 @@
       }
     });
 
-    const PRISON_ACCESS_CODE = "LR-7734-OMEGA";
-    let firstSyncComplete = false;
-    let accessAuthorized = sessionStorage.getItem("last-recourse-access-authorized") === "true";
-    const minimumBootTime = new Promise(resolve => setTimeout(resolve, 2700));
-
-    function hideBootScreen() {
-      const bootScreen = document.getElementById("bootScreen");
-      if (!bootScreen) return;
-      bootScreen.classList.add("boot-hidden");
-      setTimeout(() => bootScreen.remove(), 900);
-    }
-
-    async function tryFinishBoot() {
-      if (!firstSyncComplete || !accessAuthorized) return;
-      await minimumBootTime;
-      hideBootScreen();
-    }
-
-    function markFirstSyncComplete() {
-      firstSyncComplete = true;
-      tryFinishBoot();
-    }
-
-    document.getElementById("bootAccessForm").addEventListener("submit", event => {
-      event.preventDefault();
-      const input = document.getElementById("bootPassword");
-      const error = document.getElementById("bootError");
-      const submittedCode = input.value.trim().toUpperCase();
-
-      if (submittedCode === PRISON_ACCESS_CODE) {
-        accessAuthorized = true;
-        sessionStorage.setItem("last-recourse-access-authorized", "true");
-        error.textContent = "> ACCESS CODE ACCEPTED";
-        tryFinishBoot();
-      } else {
-        accessAuthorized = false;
-        error.textContent = "> ACCESS DENIED // INVALID PRISON CODE";
-        input.value = "";
-        input.focus();
-      }
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify({ characters }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "last-recourse-character-sheets.json";
+      link.click();
+      URL.revokeObjectURL(url);
     });
 
-    if (accessAuthorized) {
-      const error = document.getElementById("bootError");
-      error.textContent = "> SESSION ACCESS PREVIOUSLY AUTHORIZED";
-    }
+    document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
 
-    setTimeout(() => {
-      if (!firstSyncComplete) {
-        firstSyncComplete = true;
-        tryFinishBoot();
-      }
-    }, 6500);
+    document.getElementById("importFile").addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          if (!imported.characters?.length) throw new Error("Invalid file format");
+          setStatus("Importing files...", "warn");
+          for (const character of imported.characters) {
+            const { id, ...data } = normalizeCharacter(character);
+            await addDoc(charactersRef, { ...data, importedAt: serverTimestamp(), updatedAt: serverTimestamp() });
+          }
+          setStatus("Import complete", "ok");
+        } catch (error) {
+          console.error(error);
+          alert("Could not import that JSON file. Make sure it was exported from this archive.");
+          setStatus("Import failed", "danger");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    });
 
     onSnapshot(query(charactersRef, orderBy("name")), snapshot => {
-      characters = snapshot.docs.map(documentSnapshot => normalizeCharacter({
-        id: documentSnapshot.id,
-        ...documentSnapshot.data()
-      }));
+      characters = snapshot.docs.map(documentSnapshot => normalizeCharacter({ id: documentSnapshot.id, ...documentSnapshot.data() }));
 
-      if (!characters.length) {
-        activeId = null;
-      } else if (!activeId || !characters.some(character => character.id === activeId)) {
-        activeId = characters[0].id;
-      }
+      if (!characters.length) activeId = null;
+      else if (!activeId || !characters.some(character => character.id === activeId)) activeId = characters[0].id;
 
       render();
       resizeAllTextareas();
