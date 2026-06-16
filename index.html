@@ -252,6 +252,67 @@
 
     .small-note { color: var(--muted); font-size: 0.8rem; }
 
+    .dm-console {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .dm-console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dm-editor { display: grid; gap: 12px; }
+
+    .dm-editor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .dm-stat-editor {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .dm-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(5, 9, 16, 0.72);
+    }
+
+    .dm-toggle input {
+      width: auto;
+      accent-color: var(--accent);
+    }
+
+    .dm-error {
+      min-height: 1.2em;
+      color: var(--danger);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+    }
+
+    .dm-panel-hidden { display: none !important; }
+
+    [data-dm-only]:disabled,
+    [data-dm-action]:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .portrait-wrap {
       display: grid;
       grid-template-columns: 220px minmax(0, 1fr);
@@ -637,13 +698,55 @@
       <div class="panel-body stack">
         <div id="characterList" class="character-list"></div>
         <div class="button-row">
-          <button class="primary" id="addCharacterBtn">New File</button>
-          <button class="danger" id="deleteCharacterBtn">Delete</button>
+          <button class="primary" id="addCharacterBtn" data-dm-action>New File</button>
+          <button class="danger" id="deleteCharacterBtn" data-dm-action>Delete</button>
         </div>
         <div class="button-row">
           <button id="exportBtn">Export JSON</button>
-          <button id="importBtn">Import JSON</button>
+          <button id="importBtn" data-dm-action>Import JSON</button>
           <input class="hidden" type="file" id="importFile" accept="application/json" />
+        </div>
+        <div class="dm-console" id="dmConsole">
+          <div class="dm-console-header">
+            <h2 class="panel-title">DM Console</h2>
+            <span class="tag yellow" id="dmModeTag">Locked</span>
+          </div>
+          <form class="stack" id="dmAccessForm">
+            <label for="dmPassword">DM Access Code <input id="dmPassword" type="password" autocomplete="off" placeholder="Enter DM code" /></label>
+            <div class="button-row"><button class="primary" type="submit">Unlock DM</button></div>
+            <div class="dm-error" id="dmError" aria-live="polite"></div>
+          </form>
+          <div class="dm-editor dm-panel-hidden" id="dmEditor">
+            <div class="button-row"><button id="dmLockBtn" type="button">Lock DM</button></div>
+            <label>Active File <select id="dmCharacterSelect"></select></label>
+            <div class="dm-editor-grid">
+              <label>Level <input type="number" min="1" max="20" data-dm-field="level" /></label>
+              <label>Threat Class
+                <select data-dm-field="threatClass">
+                  <option>Green</option>
+                  <option>Yellow</option>
+                  <option>Red</option>
+                  <option>Black</option>
+                </select>
+              </label>
+              <label>Armor Class <input type="number" data-dm-field="armorClass" /></label>
+              <label>Max HP <input type="number" data-dm-field="maxHp" /></label>
+              <label>Speed <input type="number" data-dm-field="speed" /></label>
+              <label>Initiative Bonus <input type="number" data-dm-field="initiativeBonus" /></label>
+            </div>
+            <div class="dm-stat-editor" id="dmStatEditor"></div>
+            <label class="dm-toggle">Limit Resonance Rolls <input type="checkbox" data-dm-field="resonanceLimited" /></label>
+            <div class="dm-editor-grid">
+              <label>Resonance Roll Cap <input type="number" min="1" max="100" data-dm-field="resonanceRollLimit" /></label>
+              <label>Reserve Roll <input type="number" min="1" max="100" data-dm-field="resonanceReserveRoll" /></label>
+              <label>Output Roll <input type="number" min="1" max="100" data-dm-field="resonanceOutputRoll" /></label>
+              <label>Efficiency Roll <input type="number" min="1" max="100" data-dm-field="resonanceEfficiencyRoll" /></label>
+              <label>Current RP <input type="number" min="0" data-dm-field="resonanceCurrentRp" /></label>
+              <label>Law Strain <input type="number" min="0" max="6" data-dm-field="lawStrain" /></label>
+              <label>Spell DC Bonus <input type="number" data-dm-field="spellSaveDcBonus" /></label>
+            </div>
+          </div>
+          <p class="small-note" id="dmLockNote">DM managed stats are locked until this console is authorized.</p>
         </div>
         <p class="small-note">This version syncs through Firebase Firestore. Everyone using the same website and Firebase project should see the same character files.</p>
       </div>
@@ -741,7 +844,7 @@
             <label>Efficiency Roll d100 <input type="number" min="1" max="100" data-field="resonanceEfficiencyRoll" /></label>
           </div>
           <div class="button-row">
-            <button id="rollResonanceBtn" type="button">Roll All Resonance Stats</button>
+            <button id="rollResonanceBtn" type="button" data-dm-action>Roll All Resonance Stats</button>
             <button id="restoreRpBtn" type="button">Restore RP</button>
             <button id="longRestResonanceBtn" type="button">Long Rest Reset</button>
           </div>
@@ -905,6 +1008,30 @@
 
     const CAMPAIGN_ID = "mandate-expanse";
     const PRISON_ACCESS_CODE = "LR-7734-OMEGA";
+    const DM_ACCESS_CODE = "DM-7734-OMEGA";
+    const DM_ONLY_FIELDS = new Set([
+      "level",
+      "threatClass",
+      "armorClass",
+      "maxHp",
+      "speed",
+      "initiativeBonus",
+      "resonanceReserveRoll",
+      "resonanceOutputRoll",
+      "resonanceEfficiencyRoll",
+      "resonanceLimited",
+      "resonanceRollLimit",
+      "resonanceCheckAbility",
+      "lawStrain",
+      "spellcastingAbility",
+      "spellSaveDcBonus",
+      "spellAttackBonusOverride"
+    ]);
+    const RESONANCE_ROLL_FIELDS = new Set([
+      "resonanceReserveRoll",
+      "resonanceOutputRoll",
+      "resonanceEfficiencyRoll"
+    ]);
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -990,6 +1117,8 @@
       resonanceReserveRoll: 0,
       resonanceOutputRoll: 0,
       resonanceEfficiencyRoll: 0,
+      resonanceLimited: false,
+      resonanceRollLimit: 100,
       resonanceCurrentRp: 0,
       resonanceCheckAbility: "dex",
       resonanceNotes: "",
@@ -1009,9 +1138,18 @@
     let isRemoteRender = false;
     let firstSyncComplete = false;
     let accessAuthorized = sessionStorage.getItem("last-recourse-access-authorized") === "true";
+    let dmAuthorized = sessionStorage.getItem("last-recourse-dm-authorized") === "true";
     const minimumBootTime = new Promise(resolve => setTimeout(resolve, 2700));
 
     const statusEl = document.getElementById("connectionStatus");
+    const dmAccessForm = document.getElementById("dmAccessForm");
+    const dmEditor = document.getElementById("dmEditor");
+    const dmError = document.getElementById("dmError");
+    const dmLockBtn = document.getElementById("dmLockBtn");
+    const dmModeTag = document.getElementById("dmModeTag");
+    const dmLockNote = document.getElementById("dmLockNote");
+    const dmCharacterSelect = document.getElementById("dmCharacterSelect");
+    const dmStatEditor = document.getElementById("dmStatEditor");
 
     function setStatus(text, type = "ok") {
       statusEl.textContent = text;
@@ -1019,6 +1157,171 @@
       if (type === "ok") statusEl.classList.add("ok-pill");
       if (type === "warn") statusEl.classList.add("warn-pill");
       if (type === "danger") statusEl.classList.add("danger-pill");
+    }
+
+    function canEditField(key) {
+      return !DM_ONLY_FIELDS.has(key) || dmAuthorized;
+    }
+
+    function requireDmAccess() {
+      if (dmAuthorized) return true;
+      dmError.textContent = "> DM ACCESS REQUIRED";
+      return false;
+    }
+
+    function setDmAuthorized(value) {
+      dmAuthorized = value;
+      if (dmAuthorized) {
+        sessionStorage.setItem("last-recourse-dm-authorized", "true");
+      } else {
+        sessionStorage.removeItem("last-recourse-dm-authorized");
+      }
+      render();
+    }
+
+    function updateDmManagedButtons() {
+      document.querySelectorAll("[data-dm-action]").forEach(button => {
+        button.disabled = !dmAuthorized;
+        button.title = dmAuthorized ? "" : "DM access required";
+      });
+    }
+
+    function updateDmModeUi() {
+      dmAccessForm.classList.toggle("dm-panel-hidden", dmAuthorized);
+      dmEditor.classList.toggle("dm-panel-hidden", !dmAuthorized);
+      dmModeTag.textContent = dmAuthorized ? "Unlocked" : "Locked";
+      dmModeTag.className = `tag ${dmAuthorized ? "green" : "yellow"}`;
+      dmLockNote.textContent = dmAuthorized
+        ? "DM controls are active for the selected inmate file."
+        : "DM managed stats are locked until this console is authorized.";
+      updateDmManagedButtons();
+    }
+
+    function renderDmCharacterSelect() {
+      dmCharacterSelect.innerHTML = "";
+
+      if (!characters.length) {
+        const option = document.createElement("option");
+        option.textContent = "No inmate files";
+        option.value = "";
+        dmCharacterSelect.appendChild(option);
+        dmCharacterSelect.disabled = true;
+        return;
+      }
+
+      characters.forEach(character => {
+        const option = document.createElement("option");
+        option.value = character.id;
+        option.textContent = character.name || "Unnamed Inmate";
+        dmCharacterSelect.appendChild(option);
+      });
+
+      const character = activeCharacter();
+      dmCharacterSelect.value = character?.id || "";
+      dmCharacterSelect.disabled = !dmAuthorized;
+      dmCharacterSelect.onchange = event => {
+        activeId = event.target.value;
+        render();
+      };
+    }
+
+    function fieldValueFromInput(character, key, input) {
+      if (input.type === "checkbox") return input.checked;
+      let value = input.type === "number" ? Number(input.value || 0) : input.value;
+      if (key === "resonanceRollLimit") value = clamp(value, 1, 100);
+      if (RESONANCE_ROLL_FIELDS.has(key)) value = limitResonanceRoll(character, value);
+      if (key === "lawStrain") value = clamp(value, 0, 6);
+      if (key === "level") value = clamp(value, 1, 20);
+      return value;
+    }
+
+    function applyCharacterField(character, key, value) {
+      if (key === "resonanceRollLimit") value = clamp(value, 1, 100);
+      if (RESONANCE_ROLL_FIELDS.has(key)) value = limitResonanceRoll(character, value);
+      character[key] = value;
+
+      if (key === "resonanceLimited" || key === "resonanceRollLimit") {
+        RESONANCE_ROLL_FIELDS.forEach(rollKey => {
+          character[rollKey] = limitResonanceRoll(character, character[rollKey]);
+        });
+      }
+
+      if (key === "resonanceCurrentRp") {
+        const maxRp = maxResonanceRp(character);
+        character.resonanceCurrentRp = maxRp ? clamp(value, 0, maxRp) : Math.max(0, value);
+      }
+
+      if (RESONANCE_ROLL_FIELDS.has(key) || key === "resonanceLimited" || key === "resonanceRollLimit") {
+        const maxRp = maxResonanceRp(character);
+        if (maxRp && (!character.resonanceCurrentRp || Number(character.resonanceCurrentRp) > maxRp)) character.resonanceCurrentRp = maxRp;
+      }
+    }
+
+    function refreshAfterDmEdit(key) {
+      if (["level", "threatClass"].includes(key)) renderCharacterList();
+      if (key === "level") {
+        renderSaves();
+        renderSkills();
+        renderSpellSlots();
+      }
+      bindFieldValues();
+      renderDerivedValues();
+      renderDmCharacterSelect();
+      bindDmEditorValues();
+      scheduleSave();
+    }
+
+    function bindDmEditorValues() {
+      const character = activeCharacter();
+      document.querySelectorAll("[data-dm-field]").forEach(field => {
+        const key = field.dataset.dmField;
+        field.disabled = !dmAuthorized || !character;
+        if (field.type === "checkbox") {
+          field.checked = Boolean(character?.[key]);
+        } else {
+          field.value = character?.[key] ?? "";
+        }
+        field.onchange = () => {
+          if (!requireDmAccess() || !character) return;
+          applyCharacterField(character, key, fieldValueFromInput(character, key, field));
+          refreshAfterDmEdit(key);
+        };
+      });
+    }
+
+    function renderDmStatEditor() {
+      const character = activeCharacter();
+      dmStatEditor.innerHTML = "";
+      abilities.forEach(({ key, label }) => {
+        const field = document.createElement("label");
+        field.innerHTML = `${label} <input type="number" min="1" max="30" value="${Number(character?.stats?.[key] || 10)}" data-dm-stat="${key}" />`;
+        dmStatEditor.appendChild(field);
+      });
+
+      dmStatEditor.querySelectorAll("[data-dm-stat]").forEach(input => {
+        input.disabled = !dmAuthorized || !character;
+        input.onchange = event => {
+          if (!requireDmAccess() || !character) return;
+          character.stats[event.target.dataset.dmStat] = clamp(event.target.value, 1, 30);
+          const maxRp = maxResonanceRp(character);
+          if (maxRp && Number(character.resonanceCurrentRp || 0) > maxRp) character.resonanceCurrentRp = maxRp;
+          renderStatGrid();
+          renderSaves();
+          renderSkills();
+          renderSpellSlots();
+          bindFieldValues();
+          renderDerivedValues();
+          bindDmEditorValues();
+          scheduleSave();
+        };
+      });
+    }
+
+    function renderDmConsole() {
+      updateDmModeUi();
+      renderDmCharacterSelect();
+      renderDmStatEditor();
+      bindDmEditorValues();
     }
 
     function activeCharacter() {
@@ -1067,6 +1370,19 @@
 
     function saveTotal(character, abilityKey) {
       return mod(character.stats[abilityKey]) + (character.saveProficiencies[abilityKey] ? proficiencyBonus(character.level) : 0);
+    }
+
+    function resonanceRollCap(character) {
+      if (!character?.resonanceLimited) return 100;
+      return clamp(character.resonanceRollLimit || 100, 1, 100);
+    }
+
+    function limitResonanceRoll(character, value) {
+      return clamp(value, 0, resonanceRollCap(character));
+    }
+
+    function rollResonanceD100(character) {
+      return limitResonanceRoll(character, Math.floor(Math.random() * 100) + 1);
     }
 
     function reserveInfo(roll) {
@@ -1149,6 +1465,7 @@
       bindFieldValues();
       renderPortrait();
       renderDerivedValues();
+      renderDmConsole();
       isRemoteRender = false;
     }
 
@@ -1184,7 +1501,7 @@
         box.className = "stat-box";
         box.innerHTML = `
           <label title="${full}">${label}</label>
-          <input type="number" min="1" max="30" value="${Number(character.stats[key] || 10)}" data-stat="${key}" />
+          <input type="number" min="1" max="30" value="${Number(character.stats[key] || 10)}" data-stat="${key}" data-dm-only ${dmAuthorized ? "" : "disabled"} />
           <div class="modifier">${formatBonus(mod(character.stats[key]))}</div>
         `;
         grid.appendChild(box);
@@ -1215,7 +1532,7 @@
       abilities.forEach(({ key, label, full }) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td class="checkbox-cell"><input type="checkbox" data-save-prof="${key}" ${character.saveProficiencies[key] ? "checked" : ""}></td>
+          <td class="checkbox-cell"><input type="checkbox" data-save-prof="${key}" data-dm-only ${character.saveProficiencies[key] ? "checked" : ""} ${dmAuthorized ? "" : "disabled"}></td>
           <td>${full}</td>
           <td>${label}</td>
           <td>${formatBonus(saveTotal(character, key))}</td>
@@ -1241,8 +1558,8 @@
       skills.forEach(([key, label, ability]) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td class="checkbox-cell"><input type="checkbox" data-skill-prof="${key}" ${character.skillProficiencies[key] ? "checked" : ""}></td>
-          <td class="checkbox-cell"><input type="checkbox" data-skill-exp="${key}" ${character.skillExpertise[key] ? "checked" : ""}></td>
+          <td class="checkbox-cell"><input type="checkbox" data-skill-prof="${key}" data-dm-only ${character.skillProficiencies[key] ? "checked" : ""} ${dmAuthorized ? "" : "disabled"}></td>
+          <td class="checkbox-cell"><input type="checkbox" data-skill-exp="${key}" data-dm-only ${character.skillExpertise[key] ? "checked" : ""} ${dmAuthorized ? "" : "disabled"}></td>
           <td>${label}</td>
           <td>${ability.toUpperCase()}</td>
           <td>${formatBonus(skillTotal(character, key, ability))}</td>
@@ -1288,7 +1605,7 @@
           <div class="slot-title">Level ${level} Slots</div>
           <div class="slot-controls">
             <label>Current <input type="number" min="0" data-slot-current="${key}" value="${Number(slot.current || 0)}" /></label>
-            <label>Max <input type="number" min="0" data-slot-max="${key}" value="${Number(slot.max || 0)}" /></label>
+            <label>Max <input type="number" min="0" data-slot-max="${key}" value="${Number(slot.max || 0)}" data-dm-only ${dmAuthorized ? "" : "disabled"} /></label>
           </div>
           <div class="slot-buttons">
             <button type="button" data-slot-use="${key}">Use</button>
@@ -1365,26 +1682,20 @@
           field.disabled = true;
           return;
         }
-        field.disabled = false;
         const key = field.dataset.field;
+        const isDmManaged = DM_ONLY_FIELDS.has(key);
+        field.toggleAttribute("data-dm-only", isDmManaged);
+        field.disabled = !canEditField(key);
         field.value = character[key] ?? "";
         autoResizeTextarea(field);
         field.oninput = event => {
           autoResizeTextarea(field);
-          let value = field.type === "number" ? Number(event.target.value || 0) : event.target.value;
-          if (["resonanceReserveRoll", "resonanceOutputRoll", "resonanceEfficiencyRoll"].includes(key)) value = clamp(value, 0, 100);
-          if (key === "lawStrain") value = clamp(value, 0, 6);
-          character[key] = value;
+          const value = fieldValueFromInput(character, key, field);
+          applyCharacterField(character, key, value);
 
-          if (key === "resonanceCurrentRp") {
-            const maxRp = maxResonanceRp(character);
-            character.resonanceCurrentRp = maxRp ? clamp(value, 0, maxRp) : Math.max(0, value);
-          }
-
-          if (["resonanceReserveRoll", "resonanceOutputRoll", "resonanceEfficiencyRoll"].includes(key)) {
-            const maxRp = maxResonanceRp(character);
-            if (maxRp && (!character.resonanceCurrentRp || Number(character.resonanceCurrentRp) > maxRp)) character.resonanceCurrentRp = maxRp;
+          if (RESONANCE_ROLL_FIELDS.has(key)) {
             bindFieldValues();
+            bindDmEditorValues();
           }
 
           if (["name", "className", "level", "threatClass"].includes(key)) {
@@ -1392,7 +1703,7 @@
             renderDerivedValues();
           } else if (["spellcastingAbility", "spellSaveDcBonus", "spellAttackBonusOverride"].includes(key)) {
             renderDerivedValues();
-          } else if (["resonanceReserveRoll", "resonanceOutputRoll", "resonanceEfficiencyRoll", "resonanceCurrentRp", "resonanceCheckAbility", "lawStrain"].includes(key)) {
+          } else if (RESONANCE_ROLL_FIELDS.has(key) || ["resonanceCurrentRp", "resonanceCheckAbility", "lawStrain"].includes(key)) {
             renderDerivedValues();
           } else if (key === "portraitUrl") {
             renderPortrait();
@@ -1528,6 +1839,27 @@
 
     if (accessAuthorized) document.getElementById("bootError").textContent = "> SESSION ACCESS PREVIOUSLY AUTHORIZED";
 
+    dmAccessForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const input = document.getElementById("dmPassword");
+      const submittedCode = input.value.trim().toUpperCase();
+
+      if (submittedCode === DM_ACCESS_CODE) {
+        dmError.textContent = "> DM ACCESS GRANTED";
+        input.value = "";
+        setDmAuthorized(true);
+      } else {
+        dmError.textContent = "> DM ACCESS DENIED";
+        input.value = "";
+        input.focus();
+      }
+    });
+
+    dmLockBtn.addEventListener("click", () => {
+      dmError.textContent = "";
+      setDmAuthorized(false);
+    });
+
     setTimeout(() => {
       if (!firstSyncComplete) {
         firstSyncComplete = true;
@@ -1577,13 +1909,15 @@
     });
 
     document.getElementById("rollResonanceBtn").addEventListener("click", () => {
+      if (!requireDmAccess()) return;
       const character = activeCharacter();
       if (!character) return;
-      character.resonanceReserveRoll = Math.floor(Math.random() * 100) + 1;
-      character.resonanceOutputRoll = Math.floor(Math.random() * 100) + 1;
-      character.resonanceEfficiencyRoll = Math.floor(Math.random() * 100) + 1;
+      character.resonanceReserveRoll = rollResonanceD100(character);
+      character.resonanceOutputRoll = rollResonanceD100(character);
+      character.resonanceEfficiencyRoll = rollResonanceD100(character);
       character.resonanceCurrentRp = maxResonanceRp(character);
       bindFieldValues();
+      bindDmEditorValues();
       renderDerivedValues();
       scheduleSave();
     });
@@ -1618,6 +1952,7 @@
     });
 
     document.getElementById("addCharacterBtn").addEventListener("click", async () => {
+      if (!requireDmAccess()) return;
       try {
         setStatus("Creating file...", "warn");
         const ref = await addDoc(charactersRef, defaultCharacter());
@@ -1630,6 +1965,7 @@
     });
 
     document.getElementById("deleteCharacterBtn").addEventListener("click", async () => {
+      if (!requireDmAccess()) return;
       const character = activeCharacter();
       if (!character?.id) return;
       const confirmed = confirm(`Delete ${character.name || "this character"}? This removes it for everyone.`);
@@ -1654,9 +1990,16 @@
       URL.revokeObjectURL(url);
     });
 
-    document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+    document.getElementById("importBtn").addEventListener("click", () => {
+      if (!requireDmAccess()) return;
+      document.getElementById("importFile").click();
+    });
 
     document.getElementById("importFile").addEventListener("change", event => {
+      if (!requireDmAccess()) {
+        event.target.value = "";
+        return;
+      }
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -1679,6 +2022,8 @@
       reader.readAsText(file);
       event.target.value = "";
     });
+
+    renderDmConsole();
 
     onSnapshot(query(charactersRef, orderBy("name")), snapshot => {
       characters = snapshot.docs.map(documentSnapshot => normalizeCharacter({ id: documentSnapshot.id, ...documentSnapshot.data() }));
