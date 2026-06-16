@@ -663,6 +663,14 @@
           <div class="boot-line boot-cursor">&gt; Access code required</div>
         </div>
         <div class="boot-progress"><div class="boot-progress-fill"></div></div>
+        <div class="boot-access-form">
+          <label>Firebase account</label>
+          <div class="button-row">
+            <button id="bootGoogleSignInBtn" type="button">Sign in with Google</button>
+            <button id="bootGoogleSignOutBtn" type="button" class="hidden">Sign out</button>
+          </div>
+          <div class="boot-error" id="authError" aria-live="polite"></div>
+        </div>
         <form class="boot-access-form" id="bootAccessForm">
           <label for="bootPassword">Prison access code required</label>
           <div class="boot-access-row">
@@ -684,6 +692,7 @@
       <span class="pill danger-pill">Maximum Security Archive</span>
       <span class="pill">Origin: The Last Recourse</span>
       <span class="pill ok-pill" id="connectionStatus">Connecting to Firestore...</span>
+      <span class="pill warn-pill" id="authStatus">Not signed in</span>
     </div>
     <h1>Shared Inmate Archive</h1>
     <p class="subtitle">A shared sci-fi D&D character sheet for escaped prisoners, voidborne fugitives, and other inconvenient personnel of the Mandate Expanse.</p>
@@ -705,18 +714,21 @@
           <button id="importBtn" data-dm-action>Import JSON</button>
           <input class="hidden" type="file" id="importFile" accept="application/json" />
         </div>
+        <div class="button-row">
+          <button id="googleSignInBtn" type="button">Sign in with Google</button>
+          <button id="googleSignOutBtn" type="button" class="hidden">Sign out</button>
+        </div>
         <div class="dm-console" id="dmConsole">
           <div class="dm-console-header">
             <h2 class="panel-title">DM Console</h2>
             <span class="tag yellow" id="dmModeTag">Locked</span>
           </div>
-          <form class="stack" id="dmAccessForm">
-            <label for="dmPassword">DM Access Code <input id="dmPassword" type="password" autocomplete="off" placeholder="Enter DM code" /></label>
-            <div class="button-row"><button class="primary" type="submit">Unlock DM</button></div>
+          <div class="stack" id="dmAccessPanel">
+            <p class="small-note">Sign in with the configured DM Google account to unlock this console.</p>
             <div class="dm-error" id="dmError" aria-live="polite"></div>
-          </form>
+          </div>
           <div class="dm-editor dm-panel-hidden" id="dmEditor">
-            <div class="button-row"><button id="dmLockBtn" type="button">Lock DM</button></div>
+            <div class="button-row"><button id="dmLockBtn" type="button">Sign out</button></div>
             <label>Active File <select id="dmCharacterSelect"></select></label>
             <div class="dm-editor-grid">
               <label>Level <input type="number" min="1" max="20" data-dm-field="level" /></label>
@@ -984,6 +996,13 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
       getFirestore,
       collection,
       doc,
@@ -1007,7 +1026,7 @@
 
     const CAMPAIGN_ID = "mandate-expanse";
     const PRISON_ACCESS_CODE = "LR-7734-OMEGA";
-    const DM_ACCESS_CODE = "DM-7734-OMEGA";
+    const DM_EMAILS = ["replace-with-your-dm-email@example.com"];
     const RESONANCE_ROLL_FIELDS = new Set([
       "resonanceReserveRoll",
       "resonanceOutputRoll",
@@ -1015,6 +1034,8 @@
     ]);
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
     const db = getFirestore(app);
     const charactersRef = collection(db, "campaigns", CAMPAIGN_ID, "characters");
 
@@ -1119,11 +1140,17 @@
     let isRemoteRender = false;
     let firstSyncComplete = false;
     let accessAuthorized = sessionStorage.getItem("last-recourse-access-authorized") === "true";
-    let dmAuthorized = sessionStorage.getItem("last-recourse-dm-authorized") === "true";
+    let currentUser = null;
+    let dmAuthorized = false;
+    let unsubscribeCharacters = null;
     const minimumBootTime = new Promise(resolve => setTimeout(resolve, 2700));
 
     const statusEl = document.getElementById("connectionStatus");
-    const dmAccessForm = document.getElementById("dmAccessForm");
+    const authStatusEl = document.getElementById("authStatus");
+    const authError = document.getElementById("authError");
+    const signInButtons = [document.getElementById("bootGoogleSignInBtn"), document.getElementById("googleSignInBtn")];
+    const signOutButtons = [document.getElementById("bootGoogleSignOutBtn"), document.getElementById("googleSignOutBtn")];
+    const dmAccessPanel = document.getElementById("dmAccessPanel");
     const dmEditor = document.getElementById("dmEditor");
     const dmError = document.getElementById("dmError");
     const dmLockBtn = document.getElementById("dmLockBtn");
@@ -1140,20 +1167,52 @@
       if (type === "danger") statusEl.classList.add("danger-pill");
     }
 
+    function setAuthStatus(text, type = "warn") {
+      authStatusEl.textContent = text;
+      authStatusEl.className = "pill";
+      if (type === "ok") authStatusEl.classList.add("ok-pill");
+      if (type === "warn") authStatusEl.classList.add("warn-pill");
+      if (type === "danger") authStatusEl.classList.add("danger-pill");
+    }
+
+    function isDmUser(user = currentUser) {
+      const email = user?.email?.toLowerCase();
+      return Boolean(email && DM_EMAILS.map(dmEmail => dmEmail.toLowerCase()).includes(email));
+    }
+
     function requireDmAccess() {
       if (dmAuthorized) return true;
-      dmError.textContent = "> DM ACCESS REQUIRED";
+      dmError.textContent = currentUser ? "> DM ACCOUNT REQUIRED" : "> SIGN IN REQUIRED";
       return false;
     }
 
-    function setDmAuthorized(value) {
-      dmAuthorized = value;
-      if (dmAuthorized) {
-        sessionStorage.setItem("last-recourse-dm-authorized", "true");
-      } else {
-        sessionStorage.removeItem("last-recourse-dm-authorized");
+    async function signInWithGoogle() {
+      try {
+        authError.textContent = "";
+        await signInWithPopup(auth, googleProvider);
+      } catch (error) {
+        console.error(error);
+        authError.textContent = "> GOOGLE SIGN-IN FAILED";
       }
-      render();
+    }
+
+    async function signOutOfGoogle() {
+      try {
+        authError.textContent = "";
+        await signOut(auth);
+      } catch (error) {
+        console.error(error);
+        authError.textContent = "> SIGN-OUT FAILED";
+      }
+    }
+
+    function updateAuthUi() {
+      const signedIn = Boolean(currentUser);
+      const label = signedIn ? currentUser.email || "Signed in" : "Not signed in";
+      setAuthStatus(label, signedIn ? "ok" : "warn");
+      signInButtons.forEach(button => button.classList.toggle("hidden", signedIn));
+      signOutButtons.forEach(button => button.classList.toggle("hidden", !signedIn));
+      dmAuthorized = isDmUser();
     }
 
     function updateDmManagedButtons() {
@@ -1164,13 +1223,14 @@
     }
 
     function updateDmModeUi() {
-      dmAccessForm.classList.toggle("dm-panel-hidden", dmAuthorized);
+      dmAuthorized = isDmUser();
+      dmAccessPanel.classList.toggle("dm-panel-hidden", dmAuthorized);
       dmEditor.classList.toggle("dm-panel-hidden", !dmAuthorized);
       dmModeTag.textContent = dmAuthorized ? "Unlocked" : "Locked";
       dmModeTag.className = `tag ${dmAuthorized ? "green" : "yellow"}`;
       dmLockNote.textContent = dmAuthorized
         ? "DM controls are active for the selected inmate file."
-        : "DM managed stats are locked until this console is authorized.";
+        : "DM controls require the configured DM Google account.";
       updateDmManagedButtons();
     }
 
@@ -1364,9 +1424,9 @@
 
     function reserveInfo(roll) {
       const value = Number(roll || 0);
-      if (value >= 95) return { grade: "Abnormal", base: 12 };
-      if (value >= 76) return { grade: "Vast", base: 9 };
-      if (value >= 46) return { grade: "Dense", base: 7 };
+      if (value >= 98) return { grade: "Abnormal", base: 12 };
+      if (value >= 86) return { grade: "Vast", base: 9 };
+      if (value >= 71) return { grade: "Dense", base: 7 };
       if (value >= 11) return { grade: "Ordinary", base: 5 };
       if (value >= 1) return { grade: "Starved", base: 3 };
       return { grade: "Unrolled", base: 0 };
@@ -1376,7 +1436,7 @@
       const value = Number(roll || 0);
       if (value >= 98) return { grade: "Catastrophic", base: 5 };
       if (value >= 86) return { grade: "Violent", base: 4 };
-      if (value >= 61) return { grade: "Forceful", base: 3 };
+      if (value >= 76) return { grade: "Forceful", base: 3 };
       if (value >= 16) return { grade: "Stable", base: 2 };
       if (value >= 1) return { grade: "Suppressed", base: 1 };
       return { grade: "Unrolled", base: 0 };
@@ -1385,8 +1445,8 @@
     function efficiencyInfo(roll) {
       const value = Number(roll || 0);
       if (value >= 97) return { grade: "Near-Perfect", modifier: 4 };
-      if (value >= 81) return { grade: "Refined", modifier: 3 };
-      if (value >= 56) return { grade: "Trained", modifier: 2 };
+      if (value >= 90) return { grade: "Refined", modifier: 3 };
+      if (value >= 71) return { grade: "Trained", modifier: 2 };
       if (value >= 16) return { grade: "Rough", modifier: 1 };
       if (value >= 1) return { grade: "Wasteful", modifier: 0 };
       return { grade: "Unrolled", modifier: 0 };
@@ -1783,7 +1843,7 @@
     }
 
     async function tryFinishBoot() {
-      if (!firstSyncComplete || !accessAuthorized) return;
+      if (!firstSyncComplete || !accessAuthorized || !currentUser) return;
       await minimumBootTime;
       hideBootScreen();
     }
@@ -1791,6 +1851,28 @@
     function markFirstSyncComplete() {
       firstSyncComplete = true;
       tryFinishBoot();
+    }
+
+    function subscribeToCharacters() {
+      if (unsubscribeCharacters) unsubscribeCharacters();
+      if (!currentUser) return;
+
+      setStatus("Connecting to Firestore...", "warn");
+      unsubscribeCharacters = onSnapshot(query(charactersRef, orderBy("name")), snapshot => {
+        characters = snapshot.docs.map(documentSnapshot => normalizeCharacter({ id: documentSnapshot.id, ...documentSnapshot.data() }));
+
+        if (!characters.length) activeId = null;
+        else if (!activeId || !characters.some(character => character.id === activeId)) activeId = characters[0].id;
+
+        render();
+        resizeAllTextareas();
+        setStatus("Synced to Firestore", "ok");
+        markFirstSyncComplete();
+      }, error => {
+        console.error(error);
+        setStatus("Connection failed. Check Firestore setup/rules.", "danger");
+        markFirstSyncComplete();
+      });
     }
 
     document.getElementById("bootAccessForm").addEventListener("submit", event => {
@@ -1814,25 +1896,12 @@
 
     if (accessAuthorized) document.getElementById("bootError").textContent = "> SESSION ACCESS PREVIOUSLY AUTHORIZED";
 
-    dmAccessForm.addEventListener("submit", event => {
-      event.preventDefault();
-      const input = document.getElementById("dmPassword");
-      const submittedCode = input.value.trim().toUpperCase();
-
-      if (submittedCode === DM_ACCESS_CODE) {
-        dmError.textContent = "> DM ACCESS GRANTED";
-        input.value = "";
-        setDmAuthorized(true);
-      } else {
-        dmError.textContent = "> DM ACCESS DENIED";
-        input.value = "";
-        input.focus();
-      }
-    });
+    signInButtons.forEach(button => button.addEventListener("click", signInWithGoogle));
+    signOutButtons.forEach(button => button.addEventListener("click", signOutOfGoogle));
 
     dmLockBtn.addEventListener("click", () => {
       dmError.textContent = "";
-      setDmAuthorized(false);
+      signOutOfGoogle();
     });
 
     setTimeout(() => {
@@ -1999,20 +2068,29 @@
 
     renderDmConsole();
 
-    onSnapshot(query(charactersRef, orderBy("name")), snapshot => {
-      characters = snapshot.docs.map(documentSnapshot => normalizeCharacter({ id: documentSnapshot.id, ...documentSnapshot.data() }));
+    onAuthStateChanged(auth, user => {
+      currentUser = user;
+      updateAuthUi();
+      dmError.textContent = "";
 
-      if (!characters.length) activeId = null;
-      else if (!activeId || !characters.some(character => character.id === activeId)) activeId = characters[0].id;
+      if (unsubscribeCharacters) {
+        unsubscribeCharacters();
+        unsubscribeCharacters = null;
+      }
 
-      render();
-      resizeAllTextareas();
-      setStatus("Synced to Firestore", "ok");
-      markFirstSyncComplete();
-    }, error => {
-      console.error(error);
-      setStatus("Connection failed. Check Firestore setup/rules.", "danger");
-      markFirstSyncComplete();
+      if (!currentUser) {
+        characters = [];
+        activeId = null;
+        firstSyncComplete = true;
+        setStatus("Sign in required", "warn");
+        render();
+        tryFinishBoot();
+        return;
+      }
+
+      firstSyncComplete = false;
+      subscribeToCharacters();
+      tryFinishBoot();
     });
   </script>
 </body>
