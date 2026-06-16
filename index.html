@@ -306,7 +306,6 @@
 
     .dm-panel-hidden { display: none !important; }
 
-    [data-dm-only]:disabled,
     [data-dm-action]:disabled {
       opacity: 0.48;
       cursor: not-allowed;
@@ -844,7 +843,7 @@
             <label>Efficiency Roll d100 <input type="number" min="1" max="100" data-field="resonanceEfficiencyRoll" /></label>
           </div>
           <div class="button-row">
-            <button id="rollResonanceBtn" type="button" data-dm-action>Roll All Resonance Stats</button>
+            <button id="rollResonanceBtn" type="button">Roll All Resonance Stats</button>
             <button id="restoreRpBtn" type="button">Restore RP</button>
             <button id="longRestResonanceBtn" type="button">Long Rest Reset</button>
           </div>
@@ -1009,24 +1008,6 @@
     const CAMPAIGN_ID = "mandate-expanse";
     const PRISON_ACCESS_CODE = "LR-7734-OMEGA";
     const DM_ACCESS_CODE = "DM-7734-OMEGA";
-    const DM_ONLY_FIELDS = new Set([
-      "level",
-      "threatClass",
-      "armorClass",
-      "maxHp",
-      "speed",
-      "initiativeBonus",
-      "resonanceReserveRoll",
-      "resonanceOutputRoll",
-      "resonanceEfficiencyRoll",
-      "resonanceLimited",
-      "resonanceRollLimit",
-      "resonanceCheckAbility",
-      "lawStrain",
-      "spellcastingAbility",
-      "spellSaveDcBonus",
-      "spellAttackBonusOverride"
-    ]);
     const RESONANCE_ROLL_FIELDS = new Set([
       "resonanceReserveRoll",
       "resonanceOutputRoll",
@@ -1157,10 +1138,6 @@
       if (type === "ok") statusEl.classList.add("ok-pill");
       if (type === "warn") statusEl.classList.add("warn-pill");
       if (type === "danger") statusEl.classList.add("danger-pill");
-    }
-
-    function canEditField(key) {
-      return !DM_ONLY_FIELDS.has(key) || dmAuthorized;
     }
 
     function requireDmAccess() {
@@ -1501,7 +1478,7 @@
         box.className = "stat-box";
         box.innerHTML = `
           <label title="${full}">${label}</label>
-          <input type="number" min="1" max="30" value="${Number(character.stats[key] || 10)}" data-stat="${key}" data-dm-only ${dmAuthorized ? "" : "disabled"} />
+          <input type="number" min="1" max="30" value="${Number(character.stats[key] || 10)}" data-stat="${key}" />
           <div class="modifier">${formatBonus(mod(character.stats[key]))}</div>
         `;
         grid.appendChild(box);
@@ -1532,7 +1509,7 @@
       abilities.forEach(({ key, label, full }) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td class="checkbox-cell"><input type="checkbox" data-save-prof="${key}" data-dm-only ${character.saveProficiencies[key] ? "checked" : ""} ${dmAuthorized ? "" : "disabled"}></td>
+          <td class="checkbox-cell"><input type="checkbox" data-save-prof="${key}" ${character.saveProficiencies[key] ? "checked" : ""}></td>
           <td>${full}</td>
           <td>${label}</td>
           <td>${formatBonus(saveTotal(character, key))}</td>
@@ -1558,8 +1535,8 @@
       skills.forEach(([key, label, ability]) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td class="checkbox-cell"><input type="checkbox" data-skill-prof="${key}" data-dm-only ${character.skillProficiencies[key] ? "checked" : ""} ${dmAuthorized ? "" : "disabled"}></td>
-          <td class="checkbox-cell"><input type="checkbox" data-skill-exp="${key}" data-dm-only ${character.skillExpertise[key] ? "checked" : ""} ${dmAuthorized ? "" : "disabled"}></td>
+          <td class="checkbox-cell"><input type="checkbox" data-skill-prof="${key}" ${character.skillProficiencies[key] ? "checked" : ""}></td>
+          <td class="checkbox-cell"><input type="checkbox" data-skill-exp="${key}" ${character.skillExpertise[key] ? "checked" : ""}></td>
           <td>${label}</td>
           <td>${ability.toUpperCase()}</td>
           <td>${formatBonus(skillTotal(character, key, ability))}</td>
@@ -1605,7 +1582,7 @@
           <div class="slot-title">Level ${level} Slots</div>
           <div class="slot-controls">
             <label>Current <input type="number" min="0" data-slot-current="${key}" value="${Number(slot.current || 0)}" /></label>
-            <label>Max <input type="number" min="0" data-slot-max="${key}" value="${Number(slot.max || 0)}" data-dm-only ${dmAuthorized ? "" : "disabled"} /></label>
+            <label>Max <input type="number" min="0" data-slot-max="${key}" value="${Number(slot.max || 0)}" /></label>
           </div>
           <div class="slot-buttons">
             <button type="button" data-slot-use="${key}">Use</button>
@@ -1683,9 +1660,7 @@
           return;
         }
         const key = field.dataset.field;
-        const isDmManaged = DM_ONLY_FIELDS.has(key);
-        field.toggleAttribute("data-dm-only", isDmManaged);
-        field.disabled = !canEditField(key);
+        field.disabled = false;
         field.value = character[key] ?? "";
         autoResizeTextarea(field);
         field.oninput = event => {
@@ -1909,7 +1884,6 @@
     });
 
     document.getElementById("rollResonanceBtn").addEventListener("click", () => {
-      if (!requireDmAccess()) return;
       const character = activeCharacter();
       if (!character) return;
       character.resonanceReserveRoll = rollResonanceD100(character);
